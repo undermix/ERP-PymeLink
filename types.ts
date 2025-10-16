@@ -1,4 +1,3 @@
-
 export interface Client {
   id: string;
   rut: string;
@@ -9,14 +8,20 @@ export interface Client {
   contactName: string;
 }
 
+export interface WarehouseStock {
+  warehouseId: string;
+  stock: number;
+  price: number;
+}
+
 export interface Product {
   id: string;
   sku: string;
   imageUrl: string;
   name: string;
-  price: number;
-  warehouseId: string;
-  stock: number;
+  brand: string;
+  model: string;
+  locations: WarehouseStock[];
   description: string;
 }
 
@@ -28,6 +33,7 @@ export interface Warehouse {
 
 export interface QuoteItem {
   productId: string;
+  warehouseId: string;
   quantity: number;
   unitPrice: number;
 }

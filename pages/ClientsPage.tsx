@@ -1,114 +1,34 @@
-
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Client } from '../types';
+import Modal from '../components/Modal';
+import ClientForm from '../components/ClientForm';
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
+import Pagination from '../components/Pagination';
 
 const mockClients: Client[] = [
-    { id: '1', rut: '76.123.456-7', companyName: 'Tech Solutions Inc.', address: 'Av. Providencia 123', website: 'techsolutions.com', phone: '+56912345678', contactName: 'Juan Pérez' },
-    { id: '2', rut: '99.876.543-2', companyName: 'Global Web Services', address: 'Calle Falsa 456', website: 'globalweb.com', phone: '+56987654321', contactName: 'Maria Rodriguez' },
+    { id: '1', rut: '76.123.456-7', companyName: 'Tech Solutions Inc.', address: 'Av. Providencia 123', website: 'techsolutions.com', phone: '+56 9 1234 5678', contactName: 'Juan Pérez' },
+    { id: '2', rut: '99.876.543-2', companyName: 'Global Web Services', address: 'Calle Falsa 456', website: 'globalweb.com', phone: '+56 9 8765 4321', contactName: 'Maria Rodriguez' },
+    { id: '3', rut: '88.765.432-1', companyName: 'Innovate Corp', address: 'Av. Vitacura 789', website: 'innovate.cl', phone: '+56 9 1122 3344', contactName: 'Carlos Soto' },
+    { id: '4', rut: '77.654.321-K', companyName: 'Digital Flow', address: 'Los Leones 100', website: 'digitalflow.com', phone: '+56 9 5566 7788', contactName: 'Ana Gomez' },
+    { id: '5', rut: '66.543.210-9', companyName: 'Marketplace Online', address: 'Moneda 1010', website: 'mponline.cl', phone: '+56 9 9988 7766', contactName: 'Luis Martinez' },
+    { id: '6', rut: '91.234.567-8', companyName: 'Logistics Pro', address: 'Ruta 5 Sur Km 100', website: 'logisticspro.com', phone: '+56 9 4433 2211', contactName: 'Sofia Fernandez' },
+    { id: '7', rut: '82.345.678-9', companyName: 'Creative Minds', address: 'Merced 300', website: 'creativeminds.com', phone: '+56 9 8877 6655', contactName: 'Diego Lopez' },
+    { id: '8', rut: '73.456.789-0', companyName: 'Andes Foods', address: 'Av. Kennedy 5000', website: 'andesfoods.cl', phone: '+56 9 2211 3344', contactName: 'Camila Diaz' },
+    { id: '9', rut: '64.567.890-1', companyName: 'Patagonia Exports', address: 'El Bosque Norte 200', website: 'patagoniaexp.com', phone: '+56 9 6655 4433', contactName: 'Javier Morales' },
+    { id: '10', rut: '95.678.901-2', companyName: 'Quantum Devs', address: 'Apoquindo 3000', website: 'quantumdevs.io', phone: '+56 9 3344 5566', contactName: 'Valentina Reyes' },
+    { id: '11', rut: '86.789.012-3', companyName: 'Health First', address: 'La Dehesa 1234', website: 'healthfirst.cl', phone: '+56 9 7788 9900', contactName: 'Matias Castro' },
+    { id: '12', rut: '77.890.123-4', companyName: 'SecureNet', address: 'Bandera 500', website: 'securenet.com', phone: '+56 9 1231 2312', contactName: 'Isidora Silva' },
 ];
 
-// Basic RUT validation (Chile)
-const validateRut = (rut: string): boolean => {
-    // FIX: The original code performed arithmetic on `rutBody`, which is a string, causing a type error.
-    // The logic is updated to use a number for calculations and to correctly handle RUTs that contain dots.
-    const cleanRut = rut.replace(/\./g, '');
-    if (!/^[0-9]+-[0-9kK]{1}$/.test(cleanRut)) return false;
-    let tmp = cleanRut.split('-');
-    let digv = tmp[1];
-    let rutBody = tmp[0];
-    if (digv === 'K') digv = 'k';
-
-    let M = 0, S = 1;
-    let rutBodyNum = parseInt(rutBody, 10);
-    for (; rutBodyNum; rutBodyNum = Math.floor(rutBodyNum / 10)) {
-        S = (S + rutBodyNum % 10 * (9 - M++ % 6)) % 11;
-    }
-    const calculatedDigv = S ? S - 1 : 'k';
-    return calculatedDigv.toString() === digv.toLowerCase();
-};
-
-
-const ClientForm: React.FC<{ client?: Client; onSave: (client: Client) => void; onCancel: () => void; }> = ({ client, onSave, onCancel }) => {
-    const [formData, setFormData] = useState<Omit<Client, 'id'>>({
-        rut: client?.rut || '',
-        companyName: client?.companyName || '',
-        address: client?.address || '',
-        website: client?.website || '',
-        phone: client?.phone || '',
-        contactName: client?.contactName || '',
-    });
-    const [rutError, setRutError] = useState('');
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-        if (name === 'rut') {
-            if (value && !validateRut(value)) {
-                setRutError('RUT inválido. Formato: XX.XXX.XXX-X');
-            } else {
-                setRutError('');
-            }
-        }
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (formData.rut && !validateRut(formData.rut)) {
-            setRutError('No se puede guardar con un RUT inválido.');
-            return;
-        }
-        onSave({ ...formData, id: client?.id || new Date().toISOString() });
-    };
-
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-center">
-            <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                <h2 className="text-2xl font-bold mb-6 text-slate-800">{client ? 'Editar Cliente' : 'Agregar Cliente'}</h2>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-600">RUT</label>
-                            <input type="text" name="rut" value={formData.rut} onChange={handleChange} placeholder="76.123.456-7" className="mt-1 block w-full bg-slate-50 border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"/>
-                             {rutError && <p className="text-red-500 text-xs mt-1">{rutError}</p>}
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-600">Nombre Empresa</label>
-                            <input type="text" name="companyName" value={formData.companyName} onChange={handleChange} required className="mt-1 block w-full bg-slate-50 border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"/>
-                        </div>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-slate-600">Dirección</label>
-                        <input type="text" name="address" value={formData.address} onChange={handleChange} className="mt-1 block w-full bg-slate-50 border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"/>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-600">Sitio Web</label>
-                            <input type="text" name="website" value={formData.website} onChange={handleChange} placeholder="ejemplo.com" className="mt-1 block w-full bg-slate-50 border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"/>
-                        </div>
-                         <div>
-                            <label className="block text-sm font-medium text-slate-600">Teléfono</label>
-                            <input type="text" name="phone" value={formData.phone} onChange={handleChange} className="mt-1 block w-full bg-slate-50 border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"/>
-                        </div>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-slate-600">Nombre Contacto</label>
-                        <input type="text" name="contactName" value={formData.contactName} onChange={handleChange} required className="mt-1 block w-full bg-slate-50 border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"/>
-                    </div>
-                    <div className="flex justify-end space-x-4 pt-4">
-                        <button type="button" onClick={onCancel} className="px-4 py-2 bg-slate-200 text-slate-800 rounded-md hover:bg-slate-300">Cancelar</button>
-                        <button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Guardar</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
-};
+const ITEMS_PER_PAGE = 14;
 
 const ClientsPage: React.FC = () => {
     const [clients, setClients] = useState<Client[]>(mockClients);
     const [searchTerm, setSearchTerm] = useState('');
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingClient, setEditingClient] = useState<Client | undefined>(undefined);
+    const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
 
     const filteredClients = useMemo(() => 
         clients.filter(client =>
@@ -116,12 +36,23 @@ const ClientsPage: React.FC = () => {
             client.rut.toLowerCase().includes(searchTerm.toLowerCase()) ||
             client.contactName.toLowerCase().includes(searchTerm.toLowerCase())
         ), [clients, searchTerm]);
+    
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm]);
+
+    const totalPages = Math.ceil(filteredClients.length / ITEMS_PER_PAGE);
+    const paginatedClients = useMemo(() =>
+        filteredClients.slice(
+            (currentPage - 1) * ITEMS_PER_PAGE,
+            currentPage * ITEMS_PER_PAGE
+        ), [filteredClients, currentPage]);
 
     const handleSave = (client: Client) => {
         if (editingClient) {
             setClients(clients.map(c => c.id === client.id ? client : c));
         } else {
-            setClients([...clients, client]);
+            setClients([...clients, { ...client, id: new Date().toISOString() }]);
         }
         setIsFormOpen(false);
         setEditingClient(undefined);
@@ -136,6 +67,13 @@ const ClientsPage: React.FC = () => {
         setEditingClient(undefined);
         setIsFormOpen(true);
     }
+    
+    const handleConfirmDelete = () => {
+        if (clientToDelete) {
+            setClients(clients.filter(c => c.id !== clientToDelete.id));
+            setClientToDelete(null); 
+        }
+    };
     
     return (
         <div>
@@ -169,15 +107,15 @@ const ClientsPage: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredClients.map(client => (
+                        {paginatedClients.map(client => (
                             <tr key={client.id} className="bg-white border-b border-slate-200 hover:bg-slate-50">
                                 <td className="px-6 py-4 font-medium text-slate-900">{client.rut}</td>
                                 <td className="px-6 py-4">{client.companyName}</td>
                                 <td className="px-6 py-4">{client.contactName}</td>
                                 <td className="px-6 py-4">{client.phone}</td>
                                 <td className="px-6 py-4 space-x-3">
-                                    <button onClick={() => handleEdit(client)} className="text-indigo-500 hover:text-indigo-700"><i className="fas fa-edit"></i></button>
-                                    <button className="text-red-500 hover:text-red-700"><i className="fas fa-trash"></i></button>
+                                    <button onClick={() => handleEdit(client)} className="text-indigo-500 hover:text-indigo-700" title="Editar" aria-label={`Editar ${client.companyName}`}><i className="fas fa-edit"></i></button>
+                                    <button onClick={() => setClientToDelete(client)} className="text-red-500 hover:text-red-700" title="Eliminar" aria-label={`Eliminar ${client.companyName}`}><i className="fas fa-trash"></i></button>
                                 </td>
                             </tr>
                         ))}
@@ -186,7 +124,33 @@ const ClientsPage: React.FC = () => {
                  {filteredClients.length === 0 && <p className="text-center p-6 text-slate-500">No se encontraron clientes.</p>}
             </div>
 
-            {isFormOpen && <ClientForm client={editingClient} onSave={handleSave} onCancel={() => setIsFormOpen(false)} />}
+            {filteredClients.length > 0 && totalPages > 1 && (
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                />
+            )}
+
+            <Modal 
+                isOpen={isFormOpen} 
+                onClose={() => setIsFormOpen(false)} 
+                title={editingClient ? 'Editar Cliente' : 'Agregar Cliente'}
+            >
+                <ClientForm 
+                    client={editingClient} 
+                    onSave={handleSave} 
+                    onCancel={() => setIsFormOpen(false)} 
+                />
+            </Modal>
+            
+            <DeleteConfirmationModal
+                isOpen={!!clientToDelete}
+                onClose={() => setClientToDelete(null)}
+                onConfirm={handleConfirmDelete}
+                itemName={clientToDelete?.companyName || ''}
+                itemType="Cliente"
+            />
         </div>
     );
 };

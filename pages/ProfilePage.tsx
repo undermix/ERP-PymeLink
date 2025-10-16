@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 const ProfilePage: React.FC = () => {
@@ -70,8 +69,8 @@ const ProfilePage: React.FC = () => {
                             <td className="py-3">Administrador</td>
                             <td className="py-3">Hoy</td>
                             <td className="py-3 space-x-2">
-                                <button className="text-indigo-500"><i className="fas fa-edit"></i></button>
-                                <button className="text-red-500"><i className="fas fa-trash"></i></button>
+                                <button title="Editar" className="text-indigo-500"><i className="fas fa-edit"></i></button>
+                                <button title="Eliminar" className="text-red-500"><i className="fas fa-trash"></i></button>
                             </td>
                         </tr>
                     </tbody>
