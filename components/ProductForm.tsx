@@ -1,11 +1,6 @@
 import React, { useState } from 'react';
 import { Product, WarehouseStock } from '../types';
-
-// Mock data, in a real app this would come from an API or context
-const mockWarehouses = [
-    { id: '1', name: 'Bodega Principal', location: 'Santiago Centro' },
-    { id: '2', name: 'Bodega Secundaria', location: 'Pudahuel' },
-];
+import { mockWarehouses } from '../data/mockData';
 
 interface ProductFormProps {
     product?: Product;

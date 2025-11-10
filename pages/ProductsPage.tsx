@@ -1,25 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Product } from '../types';
+import { mockProducts } from '../data/mockData';
 import Modal from '../components/Modal';
 import ProductForm from '../components/ProductForm';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import Pagination from '../components/Pagination';
-
-const mockProducts: Product[] = [
-    { id: '1', sku: 'TS-001', imageUrl: 'https://picsum.photos/seed/p1/400/400', name: 'Laptop Pro X', brand: 'TechBrand', model: 'X-Pro 15', locations: [{ warehouseId: '1', price: 1200, stock: 30 }, { warehouseId: '2', price: 1250, stock: 20 }], description: 'High performance laptop for professionals.' },
-    { id: '2', sku: 'TS-002', imageUrl: 'https://picsum.photos/seed/p2/400/400', name: 'Wireless Mouse', brand: 'ClickFast', model: 'CF-200', locations: [{ warehouseId: '2', price: 45, stock: 200 }], description: 'Ergonomic wireless mouse.' },
-    { id: '3', sku: 'TS-003', imageUrl: 'https://picsum.photos/seed/p3/400/400', name: 'Mechanical Keyboard', brand: 'GamerGear', model: 'Mech-RGB', locations: [{ warehouseId: '1', price: 150, stock: 100 }], description: 'RGB mechanical keyboard for gaming.' },
-    { id: '4', sku: 'MON-01', imageUrl: 'https://picsum.photos/seed/p4/400/400', name: '4K UltraWide Monitor', brand: 'ViewSonic', model: 'VX3211-4K-MHD', locations: [{ warehouseId: '1', price: 750, stock: 50 }], description: 'A 32-inch 4K monitor with HDR support.' },
-    { id: '5', sku: 'CAM-01', imageUrl: 'https://picsum.photos/seed/p5/400/400', name: 'Webcam HD 1080p', brand: 'Logitech', model: 'C920', locations: [{ warehouseId: '2', price: 80, stock: 150 }], description: 'HD 1080p webcam for video conferencing.' },
-    { id: '6', sku: 'HDD-01', imageUrl: 'https://picsum.photos/seed/p6/400/400', name: 'External SSD 1TB', brand: 'Samsung', model: 'T7', locations: [{ warehouseId: '1', price: 110, stock: 80 }, { warehouseId: '2', price: 115, stock: 40 }], description: 'Portable 1TB SSD with fast transfer speeds.' },
-    { id: '7', sku: 'PRN-01', imageUrl: 'https://picsum.photos/seed/p7/400/400', name: 'Laser Printer Pro', brand: 'HP', model: 'LaserJet M209dwe', locations: [{ warehouseId: '1', price: 250, stock: 25 }], description: 'Monochrome laser printer for small offices.' },
-    { id: '8', sku: 'SPK-01', imageUrl: 'https://picsum.photos/seed/p8/400/400', name: 'Bluetooth Speaker', brand: 'JBL', model: 'Flip 6', locations: [{ warehouseId: '2', price: 130, stock: 300 }], description: 'Portable and waterproof Bluetooth speaker.' },
-    { id: '9', sku: 'ROU-01', imageUrl: 'https://picsum.photos/seed/p9/400/400', name: 'WiFi 6 Router', brand: 'TP-Link', model: 'Archer AX10', locations: [{ warehouseId: '1', price: 80, stock: 60 }], description: 'Next-gen WiFi 6 router for faster speeds.' },
-    { id: '10', sku: 'USB-01', imageUrl: 'https://picsum.photos/seed/p10/400/400', name: 'USB-C Hub', brand: 'Anker', model: 'PowerExpand+', locations: [{ warehouseId: '2', price: 40, stock: 250 }], description: '7-in-1 USB-C hub with HDMI and SD card reader.' },
-    { id: '11', sku: 'HDP-01', imageUrl: 'https://picsum.photos/seed/p11/400/400', name: 'Noise Cancelling Headphones', brand: 'Sony', model: 'WH-1000XM5', locations: [{ warehouseId: '1', price: 400, stock: 70 }], description: 'Industry-leading noise cancelling headphones.' },
-    { id: '12', sku: 'ERG-01', imageUrl: 'https://picsum.photos/seed/p12/400/400', name: 'Ergonomic Office Chair', brand: 'Herman Miller', model: 'Aeron', locations: [{ warehouseId: '1', price: 1500, stock: 15 }], description: 'The gold standard in ergonomic seating.' },
-    { id: '13', sku: 'UPS-01', imageUrl: 'https://picsum.photos/seed/p13/400/400', name: 'UPS Battery Backup', brand: 'APC', model: 'BE600M1', locations: [{ warehouseId: '2', price: 70, stock: 90 }], description: 'Uninterruptible power supply for essential electronics.' },
-];
 
 const GRID_ITEMS_PER_PAGE = 12;
 const LIST_ITEMS_PER_PAGE = 10;

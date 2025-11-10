@@ -1,24 +1,11 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Client } from '../types';
+import { mockClients } from '../data/mockData';
 import Modal from '../components/Modal';
 import ClientForm from '../components/ClientForm';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import Pagination from '../components/Pagination';
-
-const mockClients: Client[] = [
-    { id: '1', rut: '76.123.456-7', companyName: 'Tech Solutions Inc.', address: 'Av. Providencia 123', website: 'techsolutions.com', phone: '+56 9 1234 5678', contactName: 'Juan Pérez' },
-    { id: '2', rut: '99.876.543-2', companyName: 'Global Web Services', address: 'Calle Falsa 456', website: 'globalweb.com', phone: '+56 9 8765 4321', contactName: 'Maria Rodriguez' },
-    { id: '3', rut: '88.765.432-1', companyName: 'Innovate Corp', address: 'Av. Vitacura 789', website: 'innovate.cl', phone: '+56 9 1122 3344', contactName: 'Carlos Soto' },
-    { id: '4', rut: '77.654.321-K', companyName: 'Digital Flow', address: 'Los Leones 100', website: 'digitalflow.com', phone: '+56 9 5566 7788', contactName: 'Ana Gomez' },
-    { id: '5', rut: '66.543.210-9', companyName: 'Marketplace Online', address: 'Moneda 1010', website: 'mponline.cl', phone: '+56 9 9988 7766', contactName: 'Luis Martinez' },
-    { id: '6', rut: '91.234.567-8', companyName: 'Logistics Pro', address: 'Ruta 5 Sur Km 100', website: 'logisticspro.com', phone: '+56 9 4433 2211', contactName: 'Sofia Fernandez' },
-    { id: '7', rut: '82.345.678-9', companyName: 'Creative Minds', address: 'Merced 300', website: 'creativeminds.com', phone: '+56 9 8877 6655', contactName: 'Diego Lopez' },
-    { id: '8', rut: '73.456.789-0', companyName: 'Andes Foods', address: 'Av. Kennedy 5000', website: 'andesfoods.cl', phone: '+56 9 2211 3344', contactName: 'Camila Diaz' },
-    { id: '9', rut: '64.567.890-1', companyName: 'Patagonia Exports', address: 'El Bosque Norte 200', website: 'patagoniaexp.com', phone: '+56 9 6655 4433', contactName: 'Javier Morales' },
-    { id: '10', rut: '95.678.901-2', companyName: 'Quantum Devs', address: 'Apoquindo 3000', website: 'quantumdevs.io', phone: '+56 9 3344 5566', contactName: 'Valentina Reyes' },
-    { id: '11', rut: '86.789.012-3', companyName: 'Health First', address: 'La Dehesa 1234', website: 'healthfirst.cl', phone: '+56 9 7788 9900', contactName: 'Matias Castro' },
-    { id: '12', rut: '77.890.123-4', companyName: 'SecureNet', address: 'Bandera 500', website: 'securenet.com', phone: '+56 9 1231 2312', contactName: 'Isidora Silva' },
-];
 
 const ITEMS_PER_PAGE = 14;
 
@@ -113,7 +100,8 @@ const ClientsPage: React.FC = () => {
                                 <td className="px-6 py-4">{client.companyName}</td>
                                 <td className="px-6 py-4">{client.contactName}</td>
                                 <td className="px-6 py-4">{client.phone}</td>
-                                <td className="px-6 py-4 space-x-3">
+                                <td className="px-6 py-4 space-x-4">
+                                    <Link to={`/clients/${client.id}`} className="text-blue-500 hover:text-blue-700" title="Ver Detalles" aria-label={`Ver detalles de ${client.companyName}`}><i className="fas fa-eye"></i></Link>
                                     <button onClick={() => handleEdit(client)} className="text-indigo-500 hover:text-indigo-700" title="Editar" aria-label={`Editar ${client.companyName}`}><i className="fas fa-edit"></i></button>
                                     <button onClick={() => setClientToDelete(client)} className="text-red-500 hover:text-red-700" title="Eliminar" aria-label={`Eliminar ${client.companyName}`}><i className="fas fa-trash"></i></button>
                                 </td>

@@ -1,50 +1,9 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Quote, QuoteStatus, Client, Product, QuoteItem, Warehouse } from '../types';
+import { mockClients, mockProducts, mockWarehouses, mockQuotes as initialMockQuotes } from '../data/mockData';
 import Pagination from '../components/Pagination';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
-
-
-// Mock data, in a real app this would come from an API
-const mockClients: Client[] = [
-    { id: '1', rut: '76.123.456-7', companyName: 'Tech Solutions Inc.', address: 'Av. Providencia 123', website: 'techsolutions.com', phone: '+56 9 1234 5678', contactName: 'Juan Pérez' },
-    { id: '2', rut: '99.876.543-2', companyName: 'Global Web Services', address: 'Calle Falsa 456', website: 'globalweb.com', phone: '+56 9 8765 4321', contactName: 'Maria Rodriguez' },
-    { id: '3', rut: '88.765.432-1', companyName: 'Innovate Corp', address: 'Av. Vitacura 789', website: 'innovate.cl', phone: '+56 9 1122 3344', contactName: 'Carlos Soto' },
-    { id: '4', rut: '77.654.321-K', companyName: 'Digital Flow', address: 'Los Leones 100', website: 'digitalflow.com', phone: '+56 9 5566 7788', contactName: 'Ana Gomez' },
-    { id: '5', rut: '66.543.210-9', companyName: 'Marketplace Online', address: 'Moneda 1010', website: 'mponline.cl', phone: '+56 9 9988 7766', contactName: 'Luis Martinez' },
-    { id: '6', rut: '91.234.567-8', companyName: 'Logistics Pro', address: 'Ruta 5 Sur Km 100', website: 'logisticspro.com', phone: '+56 9 4433 2211', contactName: 'Sofia Fernandez' },
-    { id: '7', rut: '82.345.678-9', companyName: 'Creative Minds', address: 'Merced 300', website: 'creativeminds.com', phone: '+56 9 8877 6655', contactName: 'Diego Lopez' },
-    { id: '8', rut: '73.456.789-0', companyName: 'Andes Foods', address: 'Av. Kennedy 5000', website: 'andesfoods.cl', phone: '+56 9 2211 3344', contactName: 'Camila Diaz' },
-    { id: '9', rut: '64.567.890-1', companyName: 'Patagonia Exports', address: 'El Bosque Norte 200', website: 'patagoniaexp.com', phone: '+56 9 6655 4433', contactName: 'Javier Morales' },
-    { id: '10', rut: '95.678.901-2', companyName: 'Quantum Devs', address: 'Apoquindo 3000', website: 'quantumdevs.io', phone: '+56 9 3344 5566', contactName: 'Valentina Reyes' },
-    { id: '11', rut: '86.789.012-3', companyName: 'Health First', address: 'La Dehesa 1234', website: 'healthfirst.cl', phone: '+56 9 7788 9900', contactName: 'Matias Castro' },
-    { id: '12', rut: '77.890.123-4', companyName: 'SecureNet', address: 'Bandera 500', website: 'securenet.com', phone: '+56 9 1231 2312', contactName: 'Isidora Silva' },
-];
-
-const mockProducts: Product[] = [
-    { id: '1', sku: 'TS-001', imageUrl: '', name: 'Laptop Pro X', brand: 'TechBrand', model: 'X-Pro 15', locations: [{ warehouseId: '1', stock: 30, price: 1200 }, { warehouseId: '2', stock: 20, price: 1250 }], description: 'High performance laptop for professionals.' },
-    { id: '2', sku: 'TS-002', imageUrl: '', name: 'Wireless Mouse', brand: 'ClickFast', model: 'CF-200', locations: [{ warehouseId: '1', stock: 150, price: 50 }, { warehouseId: '2', stock: 200, price: 45 }], description: 'Ergonomic wireless mouse.' },
-];
-
-const mockWarehouses: Warehouse[] = [
-    { id: '1', name: 'Bodega Principal', location: 'Santiago Centro' },
-    { id: '2', name: 'Bodega Secundaria', location: 'Pudahuel' },
-];
-
-const mockQuotes: Quote[] = [
-    { id: 'Q-001', clientId: '1', items: [{ productId: '1', warehouseId: '1', quantity: 2, unitPrice: 1200 }], status: QuoteStatus.Sent, createdAt: '2023-10-26', total: 2400 },
-    { id: 'Q-002', clientId: '2', items: [{ productId: '2', warehouseId: '2', quantity: 10, unitPrice: 40 }], status: QuoteStatus.Draft, createdAt: '2023-10-27', total: 400 },
-    { id: 'Q-003', clientId: '1', items: [{ productId: '2', warehouseId: '1', quantity: 5, unitPrice: 45 }], status: QuoteStatus.Accepted, createdAt: '2023-10-25', total: 225 },
-    { id: 'Q-004', clientId: '3', items: [{ productId: '1', warehouseId: '2', quantity: 1, unitPrice: 1250 }], status: QuoteStatus.Rejected, createdAt: '2023-10-24', total: 1250 },
-    { id: 'Q-005', clientId: '4', items: [{ productId: '1', warehouseId: '1', quantity: 5, unitPrice: 1180 }, { productId: '2', warehouseId: '2', quantity: 20, unitPrice: 42 }], status: QuoteStatus.Sent, createdAt: '2023-10-23', total: 6740 },
-    { id: 'Q-006', clientId: '5', items: [{ productId: '2', warehouseId: '2', quantity: 50, unitPrice: 40 }], status: QuoteStatus.Draft, createdAt: '2023-10-22', total: 2000 },
-    { id: 'Q-007', clientId: '6', items: [{ productId: '1', warehouseId: '1', quantity: 10, unitPrice: 1150 }], status: QuoteStatus.Sent, createdAt: '2023-10-21', total: 11500 },
-    { id: 'Q-008', clientId: '7', items: [{ productId: '2', warehouseId: '1', quantity: 2, unitPrice: 50 }], status: QuoteStatus.Accepted, createdAt: '2023-10-20', total: 100 },
-    { id: 'Q-009', clientId: '8', items: [{ productId: '1', warehouseId: '1', quantity: 3, unitPrice: 1220 }], status: QuoteStatus.Draft, createdAt: '2023-10-19', total: 3660 },
-    { id: 'Q-010', clientId: '9', items: [{ productId: '2', warehouseId: '2', quantity: 15, unitPrice: 43 }], status: QuoteStatus.Sent, createdAt: '2023-10-18', total: 645 },
-    { id: 'Q-011', clientId: '10', items: [{ productId: '1', warehouseId: '1', quantity: 1, unitPrice: 1300 }], status: QuoteStatus.Accepted, createdAt: '2023-10-17', total: 1300 },
-    { id: 'Q-012', clientId: '11', items: [{ productId: '2', warehouseId: '2', quantity: 8, unitPrice: 48 }], status: QuoteStatus.Rejected, createdAt: '2023-10-16', total: 384 },
-    { id: 'Q-013', clientId: '12', items: [{ productId: '1', warehouseId: '1', quantity: 2, unitPrice: 1200 }, { productId: '2', warehouseId: '2', quantity: 5, unitPrice: 45 }], status: QuoteStatus.Sent, createdAt: '2023-10-15', total: 2625 },
-];
 
 const ITEMS_PER_PAGE = 10;
 
@@ -255,33 +214,14 @@ const QuoteForm: React.FC<{ quote?: Quote; onSave: (quote: Quote) => void; onCan
 
 
 const QuotesPage: React.FC = () => {
-    const [quotes, setQuotes] = useState<Quote[]>(mockQuotes);
+    const [quotes, setQuotes] = useState<Quote[]>(initialMockQuotes);
     const [filter, setFilter] = useState('');
     const [statusFilter, setStatusFilter] = useState<QuoteStatus | 'All'>('All');
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingQuote, setEditingQuote] = useState<Quote | undefined>(undefined);
     const [quoteToDelete, setQuoteToDelete] = useState<Quote | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
-
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [filter, statusFilter]);
-
-    const filteredQuotes = useMemo(() => 
-        quotes
-            .filter(q => statusFilter === 'All' || q.status === statusFilter)
-            .filter(q => 
-                q.id.toLowerCase().includes(filter.toLowerCase()) || 
-                mockClients.find(c => c.id === q.clientId)?.companyName.toLowerCase().includes(filter.toLowerCase())
-            ), 
-    [quotes, filter, statusFilter]);
-    
-    const totalPages = Math.ceil(filteredQuotes.length / ITEMS_PER_PAGE);
-    const paginatedQuotes = useMemo(() =>
-        filteredQuotes.slice(
-            (currentPage - 1) * ITEMS_PER_PAGE,
-            currentPage * ITEMS_PER_PAGE
-        ), [filteredQuotes, currentPage]);
+    const location = useLocation();
 
     const handleSave = (quote: Quote) => {
         if(editingQuote) {
@@ -313,6 +253,37 @@ const QuotesPage: React.FC = () => {
     const handleSendEmail = (quoteId: string) => alert(`Simulando envío por email de la cotización ${quoteId}...`);
     const handleDownloadPdf = (quoteId: string) => alert(`Simulando descarga de PDF para la cotización ${quoteId}...`);
     const handleSendWhatsApp = (quoteId: string) => alert(`Simulando envío por WhatsApp de la cotización ${quoteId}...`);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filter, statusFilter]);
+
+    useEffect(() => {
+        if (location.state?.editQuoteId) {
+            const quoteToEdit = quotes.find(q => q.id === location.state.editQuoteId);
+            if (quoteToEdit) {
+                handleEdit(quoteToEdit);
+                // Clear state after using it to prevent re-triggering on back navigation
+                window.history.replaceState({}, document.title);
+            }
+        }
+    }, [location.state, quotes]);
+
+    const filteredQuotes = useMemo(() => 
+        quotes
+            .filter(q => statusFilter === 'All' || q.status === statusFilter)
+            .filter(q => 
+                q.id.toLowerCase().includes(filter.toLowerCase()) || 
+                mockClients.find(c => c.id === q.clientId)?.companyName.toLowerCase().includes(filter.toLowerCase())
+            ), 
+    [quotes, filter, statusFilter]);
+    
+    const totalPages = Math.ceil(filteredQuotes.length / ITEMS_PER_PAGE);
+    const paginatedQuotes = useMemo(() =>
+        filteredQuotes.slice(
+            (currentPage - 1) * ITEMS_PER_PAGE,
+            currentPage * ITEMS_PER_PAGE
+        ), [filteredQuotes, currentPage]);
 
     const filterButtons: { label: string, value: QuoteStatus | 'All', activeClass: string }[] = [
         { label: 'Todos', value: 'All', activeClass: 'bg-indigo-600 text-white' },

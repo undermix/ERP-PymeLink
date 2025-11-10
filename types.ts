@@ -63,10 +63,76 @@ export enum InvoiceStatus {
 
 export interface Invoice {
     id: string;
-    quoteId: string;
+    quoteId?: string;
     clientId: string;
+    items: QuoteItem[];
     status: InvoiceStatus;
     createdAt: string;
     dueDate: string;
     total: number;
+}
+
+export enum TransactionType {
+  Credit = 'Abono',
+  Debit = 'Cargo',
+  Adjustment = 'Ajuste',
+}
+
+export interface Transaction {
+  id: string;
+  clientId: string;
+  date: string;
+  type: TransactionType;
+  description: string;
+  amount: number;
+}
+
+export enum CheckStatus {
+  Received = 'Recibido',
+  Deposited = 'Depositado',
+  Bounced = 'Protestado',
+  Cleared = 'Cobrado',
+}
+
+export interface Check {
+  id: string;
+  clientId: string;
+  number: string;
+  bank: string;
+  amount: number;
+  paymentDate: string;
+  status: CheckStatus;
+}
+
+export enum PaymentMethod {
+  Transfer = 'Transferencia',
+  CreditCard = 'Tarjeta de Crédito',
+  Cash = 'Efectivo',
+  Check = 'Cheque',
+}
+
+export interface Payment {
+  id: string;
+  clientId: string;
+  date: string;
+  method: PaymentMethod;
+  invoiceId: string;
+  amount: number;
+}
+
+export enum SiiDocumentType {
+  Invoice = 'Factura Electrónica',
+  CreditNote = 'Nota de Crédito',
+  DebitNote = 'Nota de Débito',
+  ShippingGuide = 'Guía de Despacho',
+}
+
+export interface SiiDocument {
+  id: string;
+  clientId: string;
+  type: SiiDocumentType;
+  folio: number;
+  date: string;
+  amount: number;
+  link: string;
 }

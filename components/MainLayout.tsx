@@ -18,8 +18,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     { to: "/clients", icon: "fa-users", label: "Clientes" },
     { to: "/products", icon: "fa-box-open", label: "Productos" },
     { to: "/warehouses", icon: "fa-warehouse", label: "Bodegas" },
-    { to: "/quotes", icon: "fa-file-invoice-dollar", label: "Cotizaciones" },
-    { to: "/invoices", icon: "fa-receipt", label: "Facturas" },
+    { to: "/invoices", icon: "fa-file-invoice", label: "Ordenes" },
     { to: "/profile", icon: "fa-user-cog", label: "Perfil y Usuarios" },
   ];
 

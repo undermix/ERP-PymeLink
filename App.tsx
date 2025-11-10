@@ -5,9 +5,9 @@ import LoginPage from './pages/LoginPage';
 import MainLayout from './components/MainLayout';
 import DashboardPage from './pages/DashboardPage';
 import ClientsPage from './pages/ClientsPage';
+import ClientDetailPage from './pages/ClientDetailPage';
 import ProductsPage from './pages/ProductsPage';
 import WarehousesPage from './pages/WarehousesPage';
-import QuotesPage from './pages/QuotesPage';
 import InvoicesPage from './pages/InvoicesPage';
 import ProfilePage from './pages/ProfilePage';
 
@@ -60,9 +60,9 @@ const App: React.FC = () => {
                     <Route index element={<Navigate to="/dashboard" />} />
                     <Route path="/dashboard" element={<DashboardPage />} />
                     <Route path="/clients" element={<ClientsPage />} />
+                    <Route path="/clients/:clientId" element={<ClientDetailPage />} />
                     <Route path="/products" element={<ProductsPage />} />
                     <Route path="/warehouses" element={<WarehousesPage />} />
-                    <Route path="/quotes" element={<QuotesPage />} />
                     <Route path="/invoices" element={<InvoicesPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
                   </Routes>

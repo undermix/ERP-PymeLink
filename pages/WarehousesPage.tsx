@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
 import { Warehouse } from '../types';
+import { mockWarehouses } from '../data/mockData';
 import Modal from '../components/Modal';
 import WarehouseForm from '../components/WarehouseForm';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
-
-const mockWarehouses: Warehouse[] = [
-    { id: '1', name: 'Bodega Principal', location: 'Santiago Centro' },
-    { id: '2', name: 'Bodega Secundaria', location: 'Pudahuel' },
-];
 
 const WarehousesPage: React.FC = () => {
     const [warehouses, setWarehouses] = useState<Warehouse[]>(mockWarehouses);
