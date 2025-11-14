@@ -20,7 +20,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       to={to}
       end
       className={({ isActive }) => 
-        `flex items-center px-4 py-2.5 rounded-lg transition-colors duration-200 text-sm font-medium ${isSubItem ? 'pl-8' : ''} ${
+        `flex items-center px-4 py-1 rounded-lg transition-colors duration-200 text-sm font-medium ${isSubItem ? 'pl-8' : ''} ${
           isActive 
             ? 'bg-gray-100 text-blue-600' 
             : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
@@ -67,7 +67,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <h2 className="px-4 py-2 text-sm font-bold text-gray-400 uppercase tracking-wider">Logística</h2>
             <button 
               onClick={() => setIsInventoryOpen(!isInventoryOpen)}
-              className="flex items-center w-full px-4 py-2.5 rounded-lg transition-colors duration-200 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+              className="flex items-center w-full px-4 py-1 rounded-lg transition-colors duration-200 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
             >
               <i className="fas fa-truck w-6 text-center text-base"></i>
               <span className="ml-2 whitespace-nowrap">Gestión de Inventario</span>
@@ -86,7 +86,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         
         <div className="p-4 border-t border-gray-200 flex-shrink-0">
             <NavItem to="/settings" icon="fa-cog" label="Configuración" />
-            <button onClick={handleLogout} className="flex items-center w-full px-4 py-2.5 mt-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-lg transition-colors duration-200 text-sm font-medium">
+            <button onClick={handleLogout} className="flex items-center w-full px-4 py-1 mt-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-lg transition-colors duration-200 text-sm font-medium">
                 <i className="fas fa-sign-out-alt w-6 text-center"></i>
                 <span className="ml-2 whitespace-nowrap">Cerrar Sesión</span>
             </button>

@@ -1,3 +1,4 @@
+
 import React, { useState, createContext, useContext, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
@@ -15,8 +16,8 @@ import PriceListsPage from './pages/PriceListsPage';
 import SettingsPage from './pages/SettingsPage';
 import POSPage from './pages/POSPage'; // Import POS Page
 import POSHistoryPage from './pages/POSHistoryPage';
-import { CashRegisterSession, Product, StockMovement, StockMovementReason } from './types';
-import { mockSessions as initialSessions, mockProducts as initialProducts, mockStockMovements as initialStockMovements } from './data/mockData';
+import { CashRegisterSession, Product, StockMovement, StockMovementReason, Invoice, InvoiceStatus } from './types';
+import { mockSessions as initialSessions, mockProducts as initialProducts, mockStockMovements as initialStockMovements, mockInvoices as initialInvoices } from './data/mockData';
 
 
 // --- Auth Context ---
@@ -259,6 +260,99 @@ const CashRegisterProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   );
 };
 
+// --- Invoice Context ---
+interface InvoiceContextType {
+  invoices: Invoice[];
+  saveInvoice: (invoice: Invoice) => void;
+  deleteInvoice: (invoiceId: string) => void;
+  addSiiDocumentToInvoice: (invoiceId: string, docType: string) => void;
+}
+
+const InvoiceContext = createContext<InvoiceContextType | null>(null);
+
+export const useInvoices = () => {
+  const context = useContext(InvoiceContext);
+  if (!context) {
+    throw new Error('useInvoices must be used within an InvoiceProvider');
+  }
+  return context;
+};
+
+const InvoiceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [invoices, setInvoices] = useState<Invoice[]>(() => {
+        const stored = localStorage.getItem('erp_invoices');
+        return stored ? JSON.parse(stored) : initialInvoices;
+    });
+
+    useEffect(() => {
+        localStorage.setItem('erp_invoices', JSON.stringify(invoices));
+    }, [invoices]);
+    
+    const generateNextOrderId = (): string => {
+        const lastIdNumber = invoices
+            .map(inv => parseInt(inv.id.split('-')[1], 10))
+            .filter(num => !isNaN(num))
+            .sort((a, b) => b - a)[0] || 0;
+        return `O-${String(lastIdNumber + 1).padStart(3, '0')}`;
+    };
+
+    const saveInvoice = (invoiceToSave: Invoice) => {
+        setInvoices(prevInvoices => {
+            const existingIndex = prevInvoices.findIndex(i => i.id === invoiceToSave.id);
+            if (existingIndex > -1) {
+                const updatedInvoices = [...prevInvoices];
+                updatedInvoices[existingIndex] = invoiceToSave;
+                return updatedInvoices;
+            } else {
+                 const newId = generateNextOrderId();
+                 return [{ ...invoiceToSave, id: newId }, ...prevInvoices];
+            }
+        });
+    };
+
+    const deleteInvoice = (invoiceId: string) => {
+        setInvoices(prevInvoices => prevInvoices.filter(i => i.id !== invoiceId));
+    };
+
+    const addSiiDocumentToInvoice = (invoiceId: string, docType: string) => {
+        setInvoices(currentInvoices => {
+            const invoiceIndex = currentInvoices.findIndex(inv => inv.id === invoiceId);
+
+            if (invoiceIndex === -1 || currentInvoices[invoiceIndex].siiDocument) {
+                return currentInvoices;
+            }
+
+            const lastFolio = currentInvoices
+                .map(i => i.siiDocument?.folio)
+                .filter((f): f is string => !!f)
+                .map(f => parseInt(f, 10))
+                .sort((a, b) => b - a)[0] || 0;
+
+            const newFolio = String(lastFolio + 1).padStart(4, '0');
+            const shortDocType = docType.split(' ')[0];
+            
+            const newInvoices = [...currentInvoices];
+            const updatedInvoice = {
+                ...newInvoices[invoiceIndex],
+                status: InvoiceStatus.Sent,
+                siiDocument: {
+                    type: shortDocType,
+                    folio: newFolio,
+                },
+            };
+            newInvoices[invoiceIndex] = updatedInvoice;
+
+            return newInvoices;
+        });
+    };
+    
+    return (
+        <InvoiceContext.Provider value={{ invoices, saveInvoice, deleteInvoice, addSiiDocumentToInvoice }}>
+            {children}
+        </InvoiceContext.Provider>
+    );
+};
+
 
 // --- Main App Component ---
 const ProtectedRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
@@ -271,6 +365,7 @@ const App: React.FC = () => {
     <AuthProvider>
       <CompanyProvider>
         <StockProvider>
+          <InvoiceProvider>
             <CashRegisterProvider>
                 <HashRouter>
                 <Routes>
@@ -303,6 +398,7 @@ const App: React.FC = () => {
                 </Routes>
                 </HashRouter>
             </CashRegisterProvider>
+          </InvoiceProvider>
         </StockProvider>
       </CompanyProvider>
     </AuthProvider>

@@ -1,11 +1,10 @@
 
-
-
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Invoice, InvoiceStatus, Client, StockMovementReason } from '../types';
-import { mockClients, mockInvoices as initialMockInvoices } from '../data/mockData';
+import { mockClients } from '../data/mockData';
 import { useStock } from '../App';
+import { useInvoices } from '../App';
 import Pagination from '../components/Pagination';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import Modal from '../components/Modal';
@@ -24,48 +23,34 @@ const getStatusClass = (status: InvoiceStatus) => {
 };
 
 const InvoicesPage: React.FC = () => {
-    const [invoices, setInvoices] = useState<Invoice[]>(initialMockInvoices);
+    const { invoices, saveInvoice, deleteInvoice, addSiiDocumentToInvoice } = useInvoices();
     const [filter, setFilter] = useState('');
     const [statusFilter, setStatusFilter] = useState<InvoiceStatus | 'All'>('All');
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingInvoice, setEditingInvoice] = useState<Invoice | undefined>(undefined);
     const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
+    const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+    const dropdownRef = useRef<HTMLDivElement>(null);
     const location = useLocation();
     const { addStockMovement } = useStock();
 
-    const generateNextOrderId = (allInvoices: Invoice[]): string => {
-        const lastIdNumber = allInvoices
-            .map(inv => parseInt(inv.id.split('-')[1], 10))
-            .filter(num => !isNaN(num))
-            .sort((a, b) => b - a)[0] || 0;
-        return `O-${String(lastIdNumber + 1).padStart(3, '0')}`;
-    };
-
     const handleSave = (invoice: Invoice) => {
-        const isEditing = invoices.some(i => i.id === invoice.id);
-        const oldInvoice = isEditing ? invoices.find(i => i.id === invoice.id) : null;
-        let finalInvoice = invoice;
-
-        if (isEditing) {
-            setInvoices(invoices.map(i => i.id === invoice.id ? invoice : i));
-        } else {
-            const newId = generateNextOrderId(invoices);
-            finalInvoice = { ...invoice, id: newId };
-            setInvoices([finalInvoice, ...invoices]);
-        }
+        const oldInvoice = invoices.find(i => i.id === invoice.id);
+        
+        saveInvoice(invoice);
         
         const wasDraft = oldInvoice ? oldInvoice.status === InvoiceStatus.Draft : true;
-        const isNowConfirmed = finalInvoice.status !== InvoiceStatus.Draft;
+        const isNowConfirmed = invoice.status !== InvoiceStatus.Draft;
 
         if (wasDraft && isNowConfirmed) {
-            finalInvoice.items.forEach(item => {
+            invoice.items.forEach(item => {
                 addStockMovement(
                     item.productId,
                     item.warehouseId,
                     -item.quantity,
                     StockMovementReason.InvoiceSale,
-                    finalInvoice.id
+                    invoice.id
                 );
             });
         }
@@ -86,10 +71,25 @@ const InvoicesPage: React.FC = () => {
 
     const handleConfirmDelete = () => {
         if (invoiceToDelete) {
-            setInvoices(invoices.filter(i => i.id !== invoiceToDelete.id));
+            deleteInvoice(invoiceToDelete.id);
             setInvoiceToDelete(null);
         }
     };
+
+    const handleCreateSiiDoc = (invoiceId: string, docType: string) => {
+        addSiiDocumentToInvoice(invoiceId, docType);
+        setOpenDropdown(null);
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setOpenDropdown(null);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     useEffect(() => {
         setCurrentPage(1);
@@ -130,6 +130,34 @@ const InvoicesPage: React.FC = () => {
         { label: InvoiceStatus.Paid, value: InvoiceStatus.Paid },
         { label: InvoiceStatus.Overdue, value: InvoiceStatus.Overdue },
     ];
+    
+    const SiiDropdown: React.FC<{ invoice: Invoice }> = ({ invoice }) => (
+        <div className="relative inline-block text-left" ref={dropdownRef}>
+            <button 
+                type="button" 
+                onClick={() => setOpenDropdown(openDropdown === invoice.id ? null : invoice.id)}
+                className="inline-flex justify-center items-center w-full rounded-md border border-gray-300 shadow-sm px-3 py-1 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+                SII
+                <i className="fas fa-chevron-down -mr-1 ml-2 h-5 w-5" aria-hidden="true"></i>
+            </button>
+            {openDropdown === invoice.id && (
+                <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                    <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                        <a href="#" onClick={(e) => { e.preventDefault(); handleCreateSiiDoc(invoice.id, 'Factura Electrónica')}} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                            <i className="fas fa-file-alt w-5 mr-3 text-gray-400"></i> Factura Electrónica
+                        </a>
+                        <a href="#" onClick={(e) => { e.preventDefault(); handleCreateSiiDoc(invoice.id, 'Boleta Electrónica')}} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                            <i className="fas fa-file-invoice-dollar w-5 mr-3 text-gray-400"></i> Boleta Electrónica
+                        </a>
+                        <a href="#" onClick={(e) => { e.preventDefault(); handleCreateSiiDoc(invoice.id, 'Guía Despacho Electrónica')}} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                            <i className="fas fa-file-signature w-5 mr-3 text-gray-400"></i> Guía Despacho Electrónica
+                        </a>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 
     return (
         <div>
@@ -172,7 +200,7 @@ const InvoicesPage: React.FC = () => {
                     <thead className="text-xs text-gray-700 uppercase bg-gray-50">
                         <tr>
                             <th scope="col" className="px-6 py-3 font-semibold">ID Orden</th>
-                            <th scope="col" className="px-6 py-3 font-semibold">Cliente</th>
+                            <th scope="col" className="px-6 py-3 font-semibold">Origen</th>
                             <th scope="col" className="px-6 py-3 font-semibold">F. Creación</th>
                             <th scope="col" className="px-6 py-3 font-semibold">F. Venc.</th>
                             <th scope="col" className="px-6 py-3 font-semibold">Total</th>
@@ -182,18 +210,26 @@ const InvoicesPage: React.FC = () => {
                     </thead>
                     <tbody>
                         {paginatedInvoices.map(invoice => (
-                            <tr key={invoice.id} className="bg-white border-b border-gray-200 hover:bg-gray-50">
-                                <td className="px-6 py-4 font-medium text-gray-900">{invoice.id}</td>
-                                <td className="px-6 py-4">{mockClients.find(c => c.id === invoice.clientId)?.companyName}</td>
-                                <td className="px-6 py-4">{invoice.createdAt}</td>
-                                <td className="px-6 py-4">{invoice.dueDate}</td>
-                                <td className="px-6 py-4">${invoice.total.toLocaleString()}</td>
-                                <td className="px-6 py-4"><span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusClass(invoice.status)}`}>{invoice.status}</span></td>
-                                <td className="px-6 py-4 space-x-4 text-lg text-right">
-                                    <button onClick={() => handleSendEmail(invoice.id)} title="Enviar por Email" className="text-gray-400 hover:text-blue-500"><i className="fas fa-envelope"></i></button>
-                                    <button onClick={() => handleDownloadPdf(invoice.id)} title="Descargar PDF" className="text-gray-400 hover:text-red-500"><i className="fas fa-file-pdf"></i></button>
-                                    <button onClick={() => handleEdit(invoice)} title="Editar" className="text-gray-400 hover:text-indigo-600"><i className="fas fa-edit"></i></button>
-                                    <button onClick={() => setInvoiceToDelete(invoice)} title="Eliminar" className="text-gray-400 hover:text-red-600"><i className="fas fa-trash"></i></button>
+                            <tr key={invoice.id} className={`bg-white border-b border-gray-200 hover:bg-gray-50 ${openDropdown === invoice.id ? 'relative z-10' : ''}`}>
+                                <td className="px-6 py-4 font-medium text-gray-900 align-top">
+                                    <div>{invoice.id}</div>
+                                    {invoice.siiDocument && (
+                                        <span className="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                             <svg className="mr-1.5 h-2 w-2 text-green-500" fill="currentColor" viewBox="0 0 8 8"><circle cx={4} cy={4} r={3} /></svg>
+                                            {invoice.siiDocument.type} #{invoice.siiDocument.folio}
+                                        </span>
+                                    )}
+                                </td>
+                                <td className="px-6 py-4 align-top">{invoice.origin || 'N/A'}</td>
+                                <td className="px-6 py-4 align-top">{invoice.createdAt}</td>
+                                <td className="px-6 py-4 align-top">{invoice.dueDate}</td>
+                                <td className="px-6 py-4 align-top">${invoice.total.toLocaleString()}</td>
+                                <td className="px-6 py-4 align-top"><span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusClass(invoice.status)}`}>{invoice.status}</span></td>
+                                <td className="px-6 py-4 space-x-2 text-right align-top">
+                                    <SiiDropdown invoice={invoice} />
+                                    <button onClick={() => handleDownloadPdf(invoice.id)} title="Descargar PDF" className="text-gray-400 hover:text-green-600 p-2"><i className="fas fa-file-pdf"></i></button>
+                                    <button onClick={() => handleEdit(invoice)} title="Editar" className="text-gray-400 hover:text-indigo-600 p-2"><i className="fas fa-edit"></i></button>
+                                    <button onClick={() => setInvoiceToDelete(invoice)} title="Eliminar" className="text-gray-400 hover:text-red-600 p-2"><i className="fas fa-trash"></i></button>
                                 </td>
                             </tr>
                         ))}

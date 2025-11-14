@@ -15,7 +15,7 @@ interface InvoiceFormProps {
 
 const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, client, quotes = [], onSave, onCancel }) => {
     
-    const [creationMode, setCreationMode] = useState<'quote' | 'manual'>(invoice && !invoice.quoteId ? 'manual' : 'quote');
+    const [creationMode, setCreationMode] = useState<'quote' | 'manual'>(invoice && !invoice.origin ? 'manual' : 'quote');
     const [items, setItems] = useState<QuoteItem[]>(invoice?.items || []);
     const [selectedClientId, setSelectedClientId] = useState<string>(client?.id || invoice?.clientId || '');
 
@@ -28,7 +28,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, client, quotes = [],
     // State for quote selection mode
     const [quoteSearch, setQuoteSearch] = useState('');
     const [isQuoteSearchFocused, setIsQuoteSearchFocused] = useState(false);
-    const [selectedQuoteId, setSelectedQuoteId] = useState<string | undefined>(invoice?.quoteId);
+    const [selectedQuoteId, setSelectedQuoteId] = useState<string | undefined>(invoice?.origin);
 
     // State for manual item entry mode
     const [productSearch, setProductSearch] = useState('');
@@ -116,7 +116,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ invoice, client, quotes = [],
             items,
             total,
             ...formState,
-            quoteId: creationMode === 'quote' ? selectedQuoteId : undefined,
+            origin: creationMode === 'quote' ? selectedQuoteId : undefined,
             id: invoice?.id || '',
         });
     };

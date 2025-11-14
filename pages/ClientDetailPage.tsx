@@ -1,9 +1,11 @@
 
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Client, Quote, Invoice, QuoteStatus, InvoiceStatus, Transaction, TransactionType, Check, CheckStatus, Payment, PaymentMethod, SiiDocument } from '../types';
-import { mockClients, mockQuotes, mockInvoices, mockTransactions, mockChecks, mockPayments, mockSiiDocs } from '../data/mockData';
+import { Client, Quote, Invoice, QuoteStatus, InvoiceStatus, Transaction, TransactionType, Check, CheckStatus, Payment, PaymentMethod, SiiDocument, StockMovementReason } from '../types';
+import { mockClients, mockQuotes, mockTransactions, mockChecks, mockPayments, mockSiiDocs } from '../data/mockData';
+import { useInvoices } from '../App';
+import { useStock } from '../App';
 import Modal from '../components/Modal';
 import PaymentForm from '../components/PaymentForm';
 import InvoiceForm from '../components/InvoiceForm';
@@ -63,13 +65,18 @@ type ActiveTab = 'quotes' | 'invoices' | 'transactions' | 'checks' | 'payments' 
 
 const ClientDetailPage: React.FC = () => {
     const { clientId } = useParams<{ clientId: string }>();
+    const { invoices, saveInvoice, deleteInvoice, addSiiDocumentToInvoice } = useInvoices();
+    const { addStockMovement } = useStock();
+
     const [activeTab, setActiveTab] = useState<ActiveTab>('quotes');
     
     // Manage data in state to allow updates
     const [allQuotes, setAllQuotes] = useState(mockQuotes);
-    const [allInvoices, setAllInvoices] = useState(mockInvoices);
     const [payments, setPayments] = useState(() => mockPayments.filter(p => p.clientId === clientId));
     const [checks, setChecks] = useState(() => mockChecks.filter(c => c.clientId === clientId));
+    
+    const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
     // Form Modals State
     const [isPaymentFormOpen, setIsPaymentFormOpen] = useState(false);
@@ -86,7 +93,7 @@ const ClientDetailPage: React.FC = () => {
 
     const client = useMemo(() => mockClients.find(c => c.id === clientId), [clientId]);
     const clientQuotes = useMemo(() => allQuotes.filter(q => q.clientId === clientId).sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()), [allQuotes, clientId]);
-    const clientInvoices = useMemo(() => allInvoices.filter(i => i.clientId === clientId).sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()), [allInvoices, clientId]);
+    const clientInvoices = useMemo(() => invoices.filter(i => i.clientId === clientId).sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()), [invoices, clientId]);
     const clientTransactions = useMemo(() => mockTransactions.filter(t => t.clientId === clientId).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()), [clientId]);
     const clientChecks = useMemo(() => checks.sort((a,b) => new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime()), [checks]);
     const clientPayments = useMemo(() => payments.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()), [payments]);
@@ -168,22 +175,26 @@ const ClientDetailPage: React.FC = () => {
     };
 
     // Handlers for Invoices
-    const generateNextOrderId = (allInvoices: Invoice[]): string => {
-        const lastIdNumber = allInvoices
-            .map(inv => parseInt(inv.id.split('-')[1], 10))
-            .filter(num => !isNaN(num))
-            .sort((a, b) => b - a)[0] || 0;
-        return `O-${String(lastIdNumber + 1).padStart(3, '0')}`;
-    };
-
     const handleSaveInvoice = (invoice: Invoice) => {
-        const isEditing = allInvoices.some(i => i.id === invoice.id);
-        if (isEditing) {
-            setAllInvoices(prev => prev.map(i => (i.id === invoice.id ? invoice : i)));
-        } else {
-            const newId = generateNextOrderId(allInvoices);
-            setAllInvoices(prev => [{ ...invoice, id: newId }, ...prev]);
+        const oldInvoice = invoices.find(i => i.id === invoice.id);
+        
+        saveInvoice(invoice);
+        
+        const wasDraft = oldInvoice ? oldInvoice.status === InvoiceStatus.Draft : true;
+        const isNowConfirmed = invoice.status !== InvoiceStatus.Draft;
+
+        if (wasDraft && isNowConfirmed) {
+            invoice.items.forEach(item => {
+                addStockMovement(
+                    item.productId,
+                    item.warehouseId,
+                    -item.quantity,
+                    StockMovementReason.InvoiceSale,
+                    invoice.id
+                );
+            });
         }
+        
         setIsInvoiceFormOpen(false);
         setEditingInvoice(undefined);
     };
@@ -195,10 +206,25 @@ const ClientDetailPage: React.FC = () => {
 
     const handleConfirmDeleteInvoice = () => {
         if (invoiceToDelete) {
-            setAllInvoices(prev => prev.filter(i => i.id !== invoiceToDelete.id));
+            deleteInvoice(invoiceToDelete.id);
             setInvoiceToDelete(null);
         }
     };
+    
+    const handleCreateSiiDoc = (invoiceId: string, docType: string) => {
+        addSiiDocumentToInvoice(invoiceId, docType);
+        setOpenDropdown(null);
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setOpenDropdown(null);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
 
     if (!client) {
@@ -228,6 +254,34 @@ const ClientDetailPage: React.FC = () => {
         { label: QuoteStatus.Accepted, value: QuoteStatus.Accepted },
         { label: QuoteStatus.Rejected, value: QuoteStatus.Rejected },
     ];
+    
+    const SiiDropdown: React.FC<{ invoice: Invoice }> = ({ invoice }) => (
+        <div className="relative inline-block text-left" ref={dropdownRef}>
+            <button 
+                type="button" 
+                onClick={() => setOpenDropdown(openDropdown === invoice.id ? null : invoice.id)}
+                className="inline-flex justify-center items-center w-full rounded-md border border-gray-300 shadow-sm px-3 py-1 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+                SII
+                <i className="fas fa-chevron-down -mr-1 ml-2 h-5 w-5" aria-hidden="true"></i>
+            </button>
+            {openDropdown === invoice.id && (
+                <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                    <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                        <a href="#" onClick={(e) => { e.preventDefault(); handleCreateSiiDoc(invoice.id, 'Factura Electrónica')}} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                            <i className="fas fa-file-alt w-5 mr-3 text-gray-400"></i> Factura Electrónica
+                        </a>
+                        <a href="#" onClick={(e) => { e.preventDefault(); handleCreateSiiDoc(invoice.id, 'Boleta Electrónica')}} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                            <i className="fas fa-file-invoice-dollar w-5 mr-3 text-gray-400"></i> Boleta Electrónica
+                        </a>
+                        <a href="#" onClick={(e) => { e.preventDefault(); handleCreateSiiDoc(invoice.id, 'Guía Despacho Electrónica')}} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                            <i className="fas fa-file-signature w-5 mr-3 text-gray-400"></i> Guía Despacho Electrónica
+                        </a>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 
     return (
         <div>
@@ -385,20 +439,26 @@ const ClientDetailPage: React.FC = () => {
                                     </thead>
                                     <tbody>
                                         {clientInvoices.map(invoice => (
-                                            <tr key={invoice.id} className="bg-white border-b last:border-b-0 border-gray-200 hover:bg-gray-50">
-                                                <td className="px-6 py-4 font-medium text-gray-900">{invoice.id}</td>
-                                                <td className="px-6 py-4">{invoice.quoteId || 'Manual'}</td>
-                                                <td className="px-6 py-4">{invoice.createdAt}</td>
-                                                <td className="px-6 py-4">{invoice.dueDate}</td>
-                                                <td className="px-6 py-4">${invoice.total.toLocaleString()}</td>
-                                                <td className="px-6 py-4"><span className={`px-2 py-1 text-xs font-semibold rounded-full ${getInvoiceStatusClass(invoice.status)}`}>{invoice.status}</span></td>
-                                                <td className="px-6 py-4 text-right space-x-4">
-                                                    <button onClick={() => handleEditInvoice(invoice)} className="text-gray-400 hover:text-indigo-600" title="Editar Orden">
-                                                        <i className="fas fa-edit"></i>
-                                                    </button>
-                                                    <button onClick={() => setInvoiceToDelete(invoice)} className="text-gray-400 hover:text-red-600" title="Eliminar Orden">
-                                                        <i className="fas fa-trash"></i>
-                                                    </button>
+                                            <tr key={invoice.id} className={`bg-white border-b last:border-b-0 border-gray-200 hover:bg-gray-50 ${openDropdown === invoice.id ? 'relative z-10' : ''}`}>
+                                                <td className="px-6 py-4 font-medium text-gray-900 align-top">
+                                                     <div>{invoice.id}</div>
+                                                    {invoice.siiDocument && (
+                                                        <span className="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                            <svg className="mr-1.5 h-2 w-2 text-green-500" fill="currentColor" viewBox="0 0 8 8"><circle cx={4} cy={4} r={3} /></svg>
+                                                            {invoice.siiDocument.type} #{invoice.siiDocument.folio}
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 align-top">{invoice.origin || 'Manual'}</td>
+                                                <td className="px-6 py-4 align-top">{invoice.createdAt}</td>
+                                                <td className="px-6 py-4 align-top">{invoice.dueDate}</td>
+                                                <td className="px-6 py-4 align-top">${invoice.total.toLocaleString()}</td>
+                                                <td className="px-6 py-4 align-top"><span className={`px-2 py-1 text-xs font-semibold rounded-full ${getInvoiceStatusClass(invoice.status)}`}>{invoice.status}</span></td>
+                                                <td className="px-6 py-4 text-right space-x-2 align-top">
+                                                    <SiiDropdown invoice={invoice} />
+                                                    <button onClick={() => {}} title="Descargar PDF" className="text-gray-400 hover:text-green-600 p-2"><i className="fas fa-file-pdf"></i></button>
+                                                    <button onClick={() => handleEditInvoice(invoice)} className="text-gray-400 hover:text-indigo-600 p-2" title="Editar Orden"><i className="fas fa-edit"></i></button>
+                                                    <button onClick={() => setInvoiceToDelete(invoice)} className="text-gray-400 hover:text-red-600 p-2" title="Eliminar Orden"><i className="fas fa-trash"></i></button>
                                                 </td>
                                             </tr>
                                         ))}

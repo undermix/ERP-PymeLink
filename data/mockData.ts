@@ -58,18 +58,18 @@ export const mockQuotes: Quote[] = [
 ];
 
 export const mockInvoices: Invoice[] = [
-    { id: 'O-001', quoteId: 'Q-003', clientId: '1', items: [{ productId: '2', warehouseId: '1', quantity: 5, unitPrice: 45 }], status: InvoiceStatus.Paid, createdAt: '2023-10-28', dueDate: '2023-11-28', total: 225 },
-    { id: 'O-002', clientId: '2', items: [{ productId: '2', warehouseId: '2', quantity: 10, unitPrice: 40 }], status: InvoiceStatus.Sent, createdAt: '2023-10-29', dueDate: '2023-11-29', total: 400 },
-    { id: 'O-003', quoteId: 'Q-008', clientId: '7', items: [{ productId: '2', warehouseId: '1', quantity: 2, unitPrice: 50 }], status: InvoiceStatus.Paid, createdAt: '2023-10-30', dueDate: '2023-11-30', total: 100 },
-    { id: 'O-004', clientId: '1', items: [{ productId: '1', warehouseId: '2', quantity: 1, unitPrice: 1250 }], status: InvoiceStatus.Overdue, createdAt: '2023-09-01', dueDate: '2023-10-01', total: 1250 },
-    { id: 'O-005', quoteId: 'Q-005', clientId: '4', items: [{ productId: '1', warehouseId: '1', quantity: 5, unitPrice: 1180 }, { productId: '2', warehouseId: '2', quantity: 20, unitPrice: 42 }], status: InvoiceStatus.Sent, createdAt: '2023-11-01', dueDate: '2023-12-01', total: 6740 },
-    { id: 'O-006', clientId: '5', items: [], status: InvoiceStatus.Draft, createdAt: '2023-11-02', dueDate: '2023-12-02', total: 2000 },
-    { id: 'O-007', quoteId: 'Q-011', clientId: '10', items: [{ productId: '1', warehouseId: '1', quantity: 1, unitPrice: 1300 }], status: InvoiceStatus.Paid, createdAt: '2023-10-15', dueDate: '2023-11-15', total: 1300 },
-    { id: 'O-008', clientId: '6', items: [], status: InvoiceStatus.Sent, createdAt: '2023-11-03', dueDate: '2023-12-03', total: 100 },
-    { id: 'O-009', clientId: '8', items: [], status: InvoiceStatus.Overdue, createdAt: '2023-09-10', dueDate: '2023-10-10', total: 3660 },
-    { id: 'O-010', clientId: '9', items: [], status: InvoiceStatus.Paid, createdAt: '2023-10-20', dueDate: '2023-11-20', total: 645 },
-    { id: 'O-011', clientId: '11', items: [], status: InvoiceStatus.Sent, createdAt: '2023-11-05', dueDate: '2023-12-05', total: 1300 },
-    { id: 'O-012', clientId: '12', items: [], status: InvoiceStatus.Draft, createdAt: '2023-11-06', dueDate: '2023-12-06', total: 384 },
+    { id: 'O-001', origin: 'Q-003', clientId: '1', items: [{ productId: '2', warehouseId: '1', quantity: 5, unitPrice: 45 }], status: InvoiceStatus.Paid, createdAt: '2025-10-28', dueDate: '2025-11-28', total: 225 },
+    { id: 'O-002', clientId: '2', items: [{ productId: '2', warehouseId: '2', quantity: 10, unitPrice: 40 }], status: InvoiceStatus.Sent, createdAt: '2025-10-29', dueDate: '2025-11-29', total: 400 },
+    { id: 'O-003', origin: 'Q-008', clientId: '7', items: [{ productId: '2', warehouseId: '1', quantity: 2, unitPrice: 50 }], status: InvoiceStatus.Paid, createdAt: '2025-10-30', dueDate: '2025-11-30', total: 100 },
+    { id: 'O-004', clientId: '1', items: [{ productId: '1', warehouseId: '2', quantity: 1, unitPrice: 1250 }], status: InvoiceStatus.Overdue, createdAt: '2025-09-01', dueDate: '2025-10-01', total: 1250 },
+    { id: 'O-005', origin: 'Q-005', clientId: '4', items: [{ productId: '1', warehouseId: '1', quantity: 5, unitPrice: 1180 }, { productId: '2', warehouseId: '2', quantity: 20, unitPrice: 42 }], status: InvoiceStatus.Sent, createdAt: '2025-11-01', dueDate: '2025-12-01', total: 6740 },
+    { id: 'O-006', origin: 'COT-00003', clientId: '5', items: [], status: InvoiceStatus.Paid, createdAt: '10/11/2025', dueDate: '10/11/2025', total: 850123, siiDocument: { type: 'Factura', folio: '0001' } },
+    { id: 'O-007', origin: 'COT-00004', clientId: '10', items: [{ productId: '1', warehouseId: '1', quantity: 1, unitPrice: 1300 }], status: InvoiceStatus.Sent, createdAt: '10/11/2025', dueDate: '10/11/2025', total: 1030000, siiDocument: { type: 'Factura', folio: '0002' } },
+    { id: 'O-008', clientId: '6', items: [], status: InvoiceStatus.Sent, createdAt: '2025-11-03', dueDate: '2025-12-03', total: 100 },
+    { id: 'O-009', clientId: '8', items: [], status: InvoiceStatus.Overdue, createdAt: '2025-09-10', dueDate: '2025-10-10', total: 3660 },
+    { id: 'O-010', clientId: '9', items: [], status: InvoiceStatus.Paid, createdAt: '2025-10-20', dueDate: '2025-11-20', total: 645 },
+    { id: 'O-011', clientId: '11', items: [], status: InvoiceStatus.Sent, createdAt: '2025-11-05', dueDate: '2025-12-05', total: 1300 },
+    { id: 'O-012', clientId: '12', items: [], status: InvoiceStatus.Draft, createdAt: '2025-11-06', dueDate: '2025-12-06', total: 384 },
 ];
 
 export const mockTransactions: Transaction[] = [

@@ -62,15 +62,21 @@ export enum InvoiceStatus {
   Overdue = 'Vencida',
 }
 
+export interface SiiInfo {
+  type: string;
+  folio: string;
+}
+
 export interface Invoice {
     id: string;
-    quoteId?: string;
+    origin?: string;
     clientId: string;
     items: QuoteItem[];
     status: InvoiceStatus;
     createdAt: string;
     dueDate: string;
     total: number;
+    siiDocument?: SiiInfo;
 }
 
 export enum TransactionType {
