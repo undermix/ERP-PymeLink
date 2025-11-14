@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Client } from '../types';
 
@@ -101,32 +102,32 @@ const ClientForm: React.FC<ClientFormProps> = ({ client, onSave, onCancel }) => 
         onSave({ ...formData, id: client?.id || new Date().toISOString() });
     };
 
-    const inputClasses = "w-full pl-10 pr-4 py-3 bg-slate-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800";
+    const inputClasses = "w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800";
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             {/* Nombre Empresa */}
             <div>
-                <label htmlFor="companyName" className="block text-sm font-medium text-slate-600 mb-1">Nombre Empresa</label>
+                <label htmlFor="companyName" className="block text-sm font-medium text-gray-600 mb-1">Nombre Empresa</label>
                 <div className="relative">
-                    <i className="fas fa-building absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <i className="fas fa-building absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                     <input id="companyName" type="text" name="companyName" value={formData.companyName} onChange={handleChange} required className={inputClasses}/>
                 </div>
             </div>
             {/* RUT and Contacto */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label htmlFor="rut" className="block text-sm font-medium text-slate-600 mb-1">RUT</label>
+                    <label htmlFor="rut" className="block text-sm font-medium text-gray-600 mb-1">RUT</label>
                     <div className="relative">
-                        <i className="fas fa-id-card absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <i className="fas fa-id-card absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                         <input id="rut" type="text" name="rut" value={formData.rut} onChange={handleChange} placeholder="12.345.678-9" className={inputClasses}/>
                     </div>
                     {rutError && <p className="text-red-500 text-xs mt-1">{rutError}</p>}
                 </div>
                 <div>
-                    <label htmlFor="contactName" className="block text-sm font-medium text-slate-600 mb-1">Nombre Contacto</label>
+                    <label htmlFor="contactName" className="block text-sm font-medium text-gray-600 mb-1">Nombre Contacto</label>
                      <div className="relative">
-                        <i className="fas fa-user absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <i className="fas fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                         <input id="contactName" type="text" name="contactName" value={formData.contactName} onChange={handleChange} required className={inputClasses}/>
                     </div>
                 </div>
@@ -134,32 +135,32 @@ const ClientForm: React.FC<ClientFormProps> = ({ client, onSave, onCancel }) => 
             {/* Telefono and Sitio Web */}
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-slate-600 mb-1">Teléfono</label>
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-600 mb-1">Teléfono</label>
                      <div className="relative">
-                        <i className="fas fa-phone absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <i className="fas fa-phone absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                         <input id="phone" type="tel" name="phone" value={formData.phone} onChange={handlePhoneChange} placeholder="+56 9 1234 5678" className={inputClasses}/>
                     </div>
                 </div>
                 <div>
-                    <label htmlFor="website" className="block text-sm font-medium text-slate-600 mb-1">Sitio Web</label>
+                    <label htmlFor="website" className="block text-sm font-medium text-gray-600 mb-1">Sitio Web</label>
                      <div className="relative">
-                        <i className="fas fa-globe absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <i className="fas fa-globe absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                         <input id="website" type="text" name="website" value={formData.website} onChange={handleChange} placeholder="ejemplo.com" className={inputClasses}/>
                     </div>
                 </div>
             </div>
             {/* Dirección */}
             <div>
-                <label htmlFor="address" className="block text-sm font-medium text-slate-600 mb-1">Dirección</label>
+                <label htmlFor="address" className="block text-sm font-medium text-gray-600 mb-1">Dirección</label>
                  <div className="relative">
-                    <i className="fas fa-map-marker-alt absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <i className="fas fa-map-marker-alt absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                     <input id="address" type="text" name="address" value={formData.address} onChange={handleChange} className={inputClasses}/>
                 </div>
             </div>
             {/* Buttons */}
             <div className="flex justify-end space-x-4 pt-4">
-                <button type="button" onClick={onCancel} className="px-6 py-2 bg-slate-100 text-slate-700 font-semibold rounded-lg hover:bg-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-400">Cancelar</button>
-                <button type="submit" className="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Guardar</button>
+                <button type="button" onClick={onCancel} className="px-6 py-2 bg-white text-gray-700 font-medium text-sm rounded-md border border-gray-300 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400">Cancelar</button>
+                <button type="submit" className="px-6 py-2 bg-blue-600 text-white font-medium text-sm rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Guardar</button>
             </div>
         </form>
     );

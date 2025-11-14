@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Warehouse } from '../types';
 import { mockWarehouses } from '../data/mockData';
@@ -41,27 +42,27 @@ const WarehousesPage: React.FC = () => {
     return (
         <div>
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold text-slate-800">Bodegas</h1>
-                <button onClick={handleAddNew} className="bg-indigo-600 text-white px-4 py-2 rounded-lg shadow hover:bg-indigo-700 transition duration-300 flex items-center">
+                <h1 className="text-3xl font-bold text-gray-800">Bodegas</h1>
+                <button onClick={handleAddNew} className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-sm hover:bg-blue-700 transition duration-300 flex items-center font-medium text-sm">
                     <i className="fas fa-plus mr-2"></i> Agregar Bodega
                 </button>
             </div>
             
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                <ul className="divide-y divide-slate-200">
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+                <ul className="divide-y divide-gray-200">
                     {warehouses.map(wh => (
-                        <li key={wh.id} className="p-6 flex justify-between items-center hover:bg-slate-50 transition-colors">
+                        <li key={wh.id} className="p-6 flex justify-between items-center hover:bg-gray-50 transition-colors">
                             <div>
-                                <p className="font-bold text-lg text-slate-800">{wh.name}</p>
-                                <p className="text-sm text-slate-500"><i className="fas fa-map-marker-alt mr-2 text-slate-400"></i>{wh.location}</p>
+                                <p className="font-semibold text-lg text-gray-800">{wh.name}</p>
+                                <p className="text-sm text-gray-500"><i className="fas fa-map-marker-alt mr-2 text-gray-400"></i>{wh.location}</p>
                             </div>
                             <div className="space-x-4">
-                                <button onClick={() => handleEdit(wh)} title="Editar" className="text-indigo-500 hover:text-indigo-700 text-lg" aria-label={`Editar ${wh.name}`}><i className="fas fa-edit"></i></button>
-                                <button onClick={() => setWarehouseToDelete(wh)} title="Eliminar" className="text-red-500 hover:text-red-700 text-lg" aria-label={`Eliminar ${wh.name}`}><i className="fas fa-trash"></i></button>
+                                <button onClick={() => handleEdit(wh)} title="Editar" className="text-gray-400 hover:text-indigo-600 text-lg" aria-label={`Editar ${wh.name}`}><i className="fas fa-edit"></i></button>
+                                <button onClick={() => setWarehouseToDelete(wh)} title="Eliminar" className="text-gray-400 hover:text-red-600 text-lg" aria-label={`Eliminar ${wh.name}`}><i className="fas fa-trash"></i></button>
                             </div>
                         </li>
                     ))}
-                     {warehouses.length === 0 && <p className="text-center p-6 text-slate-500">No hay bodegas registradas.</p>}
+                     {warehouses.length === 0 && <p className="text-center p-6 text-gray-500">No hay bodegas registradas.</p>}
                 </ul>
             </div>
 

@@ -1,3 +1,4 @@
+
 export interface Client {
   id: string;
   rut: string;
@@ -107,6 +108,7 @@ export interface Check {
 export enum PaymentMethod {
   Transfer = 'Transferencia',
   CreditCard = 'Tarjeta de Crédito',
+  DebitCard = 'Tarjeta de Débito',
   Cash = 'Efectivo',
   Check = 'Cheque',
 }
@@ -135,4 +137,49 @@ export interface SiiDocument {
   date: string;
   amount: number;
   link: string;
+}
+
+// --- POS Types ---
+export interface POSSaleItem {
+    productId: string;
+    warehouseId: string;
+    quantity: number;
+    unitPrice: number;
+}
+
+export interface POSSale {
+    id: string;
+    items: POSSaleItem[];
+    total: number;
+    paymentMethod: PaymentMethod;
+    createdAt: Date;
+}
+
+export interface CashRegisterSession {
+    id: string;
+    openingTime: Date;
+    closingTime?: Date;
+    openingBalance: number;
+    closingBalance?: number;
+    sales: POSSale[];
+}
+
+// --- Stock Management Types ---
+export enum StockMovementReason {
+    InitialStock = 'Stock Inicial',
+    POSSale = 'Venta POS',
+    InvoiceSale = 'Venta Facturada',
+    Purchase = 'Compra a Proveedor',
+    Adjustment = 'Ajuste Manual',
+    Transfer = 'Traslado entre Bodegas',
+}
+
+export interface StockMovement {
+    id: string;
+    productId: string;
+    warehouseId: string;
+    quantity: number; // Positive for entry, negative for exit
+    reason: StockMovementReason;
+    referenceId?: string; // e.g., POS Sale ID or Invoice ID
+    createdAt: Date;
 }

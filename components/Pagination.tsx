@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 interface PaginationProps {
@@ -20,27 +21,25 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
   };
 
   return (
-    <div className="flex justify-center items-center mt-8 space-x-4">
+    <div className="flex justify-center items-center mt-8 space-x-2">
       <button
         onClick={handlePrevious}
         disabled={currentPage === 1}
-        className="flex items-center px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="flex items-center px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <i className="fas fa-arrow-left mr-2"></i>
-        Anterior
+        <i className="fas fa-arrow-left"></i>
       </button>
 
-      <span className="text-sm text-slate-700">
+      <span className="text-sm text-gray-700 px-4">
         Página <span className="font-bold">{currentPage}</span> de <span className="font-bold">{totalPages}</span>
       </span>
 
       <button
         onClick={handleNext}
         disabled={currentPage === totalPages}
-        className="flex items-center px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="flex items-center px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Siguiente
-        <i className="fas fa-arrow-right ml-2"></i>
+        <i className="fas fa-arrow-right"></i>
       </button>
     </div>
   );

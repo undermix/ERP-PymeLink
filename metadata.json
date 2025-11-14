@@ -1,5 +1,5 @@
 {
-  "name": "Modern ERP System",
-  "description": "A comprehensive ERP system with modules for dashboard, clients, products, warehouses, quotes, invoices, and user management. Built with a modern, responsive interface.",
+  "name": "ERP System",
+  "description": "A simple ERP system with Dashboard, Clients, and Products sections.",
   "requestFramePermissions": []
 }

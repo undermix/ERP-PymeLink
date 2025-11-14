@@ -1,5 +1,4 @@
-
-import { Client, Product, Warehouse, Quote, Invoice, Transaction, Check, Payment, SiiDocument, QuoteStatus, InvoiceStatus, TransactionType, CheckStatus, PaymentMethod, SiiDocumentType } from '../types';
+import { Client, Product, Warehouse, Quote, Invoice, Transaction, Check, Payment, SiiDocument, QuoteStatus, InvoiceStatus, TransactionType, CheckStatus, PaymentMethod, SiiDocumentType, CashRegisterSession, StockMovement } from '../types';
 
 export const mockClients: Client[] = [
     { id: '1', rut: '76.123.456-7', companyName: 'Tech Solutions Inc.', address: 'Av. Providencia 123', website: 'techsolutions.com', phone: '+56 9 1234 5678', contactName: 'Juan Pérez' },
@@ -14,6 +13,11 @@ export const mockClients: Client[] = [
     { id: '10', rut: '95.678.901-2', companyName: 'Quantum Devs', address: 'Apoquindo 3000', website: 'quantumdevs.io', phone: '+56 9 3344 5566', contactName: 'Valentina Reyes' },
     { id: '11', rut: '86.789.012-3', companyName: 'Health First', address: 'La Dehesa 1234', website: 'healthfirst.cl', phone: '+56 9 7788 9900', contactName: 'Matias Castro' },
     { id: '12', rut: '77.890.123-4', companyName: 'SecureNet', address: 'Bandera 500', website: 'securenet.com', phone: '+56 9 1231 2312', contactName: 'Isidora Silva' },
+    { id: '13', rut: '76.123.456-7', companyName: 'Tech Solutions Inc.', address: 'Av. Providencia 123', website: 'techsolutions.com', phone: '+56 9 1234 5678', contactName: 'Juan Pérez' },
+    { id: '14', rut: '99.876.543-2', companyName: 'Global Web Services', address: 'Calle Falsa 456', website: 'globalweb.com', phone: '+56 9 8765 4321', contactName: 'Maria Rodriguez' },
+    { id: '15', rut: '88.765.432-1', companyName: 'Innovate Corp', address: 'Av. Vitacura 789', website: 'innovate.cl', phone: '+56 9 1122 3344', contactName: 'Carlos Soto' },
+    { id: '16', rut: '77.654.321-K', companyName: 'Digital Flow', address: 'Los Leones 100', website: 'digitalflow.com', phone: '+56 9 5566 7788', contactName: 'Ana Gomez' },
+    { id: '17', rut: '66.543.210-9', companyName: 'Marketplace Online', address: 'Moneda 1010', website: 'mponline.cl', phone: '+56 9 9988 7766', contactName: 'Luis Martinez' },
 ];
 
 export const mockProducts: Product[] = [
@@ -84,3 +88,31 @@ export const mockSiiDocs: SiiDocument[] = [
     { id: 'SII-001', clientId: '1', type: SiiDocumentType.Invoice, folio: 123, date: '2023-10-28', amount: 225, link: '#' },
     { id: 'SII-002', clientId: '1', type: SiiDocumentType.ShippingGuide, folio: 456, date: '2023-10-27', amount: 0, link: '#' },
 ];
+
+export const mockSessions: CashRegisterSession[] = [
+    {
+        id: 'S-1721480400000',
+        openingTime: new Date('2024-07-20T09:00:00'),
+        closingTime: new Date('2024-07-20T17:05:00'),
+        openingBalance: 50000,
+        closingBalance: 85100,
+        sales: [
+            { id: 'SALE-1', items: [{ productId: '3', warehouseId: '1', quantity: 1, unitPrice: 150 }], total: 150, paymentMethod: PaymentMethod.CreditCard, createdAt: new Date('2024-07-20T10:15:00') },
+            { id: 'SALE-2', items: [{ productId: '2', warehouseId: '1', quantity: 2, unitPrice: 50 }], total: 100, paymentMethod: PaymentMethod.DebitCard, createdAt: new Date('2024-07-20T11:30:00') },
+            { id: 'SALE-3', items: [{ productId: '4', warehouseId: '1', quantity: 1, unitPrice: 750 }], total: 750, paymentMethod: PaymentMethod.Cash, createdAt: new Date('2024-07-20T14:00:00') },
+        ]
+    },
+    {
+        id: 'S-1721566800000',
+        openingTime: new Date('2024-07-21T09:02:00'),
+        closingTime: new Date('2024-07-21T17:00:00'),
+        openingBalance: 50000,
+        closingBalance: 130000,
+        sales: [
+            { id: 'SALE-4', items: [{ productId: '5', warehouseId: '2', quantity: 1, unitPrice: 80 }], total: 80, paymentMethod: PaymentMethod.Cash, createdAt: new Date('2024-07-21T12:05:00') },
+            { id: 'SALE-5', items: [{ productId: '10', warehouseId: '2', quantity: 2, unitPrice: 40 }], total: 80, paymentMethod: PaymentMethod.Transfer, createdAt: new Date('2024-07-21T15:20:00') },
+        ]
+    }
+];
+
+export const mockStockMovements: StockMovement[] = [];

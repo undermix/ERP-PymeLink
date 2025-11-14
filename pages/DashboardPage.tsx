@@ -1,54 +1,76 @@
 
 import React from 'react';
+import { mockClients, mockProducts, mockQuotes, mockInvoices } from '../data/mockData';
+import { InvoiceStatus } from '../types';
 
-const StatCard: React.FC<{ icon: string; title: string; value: string; color: string; }> = ({ icon, title, value, color }) => (
-    <div className="bg-white rounded-xl shadow-lg p-6 flex items-center space-x-6 transform hover:scale-105 transition-transform duration-300">
-        <div className={`w-16 h-16 rounded-full flex items-center justify-center ${color}`}>
-            <i className={`fas ${icon} text-3xl text-white`}></i>
+const StatCard: React.FC<{ icon: string; title: string; value: string | number; color: string }> = ({ icon, title, value, color }) => {
+    const colorClasses: { [key: string]: string } = {
+        blue: 'bg-blue-100 text-blue-600',
+        green: 'bg-green-100 text-green-600',
+        purple: 'bg-purple-100 text-purple-600',
+        yellow: 'bg-yellow-100 text-yellow-600',
+    };
+
+    return (
+        <div className="bg-white rounded-lg shadow p-6 flex items-center">
+            <div className={`w-14 h-14 rounded-full flex items-center justify-center ${colorClasses[color]}`}>
+                <i className={`fas ${icon} text-2xl`}></i>
+            </div>
+            <div className="ml-4">
+                <p className="text-gray-500 text-sm font-medium">{title}</p>
+                <p className="text-2xl font-bold text-gray-800">{value}</p>
+            </div>
         </div>
-        <div>
-            <p className="text-slate-500 font-medium">{title}</p>
-            <p className="text-3xl font-bold text-slate-800">{value}</p>
+    );
+};
+
+const ActivityItem: React.FC<{ color: string; text: string; time: string }> = ({ color, text, time }) => {
+    const colorDotClasses: { [key: string]: string } = {
+        green: 'bg-green-500',
+        blue: 'bg-blue-500',
+        purple: 'bg-purple-500',
+    };
+
+    return (
+        <div className="flex items-start">
+            <div className="flex-shrink-0 mt-1.5">
+                <span className={`block h-2.5 w-2.5 rounded-full ${colorDotClasses[color]}`}></span>
+            </div>
+            <div className="ml-3">
+                <p className="text-sm text-gray-700">{text}</p>
+                <p className="text-xs text-gray-400">{time}</p>
+            </div>
         </div>
-    </div>
-);
+    );
+};
+
 
 const DashboardPage: React.FC = () => {
+    const totalCotizaciones = mockQuotes.length;
+    const totalFacturado = mockInvoices.filter(i => i.status === InvoiceStatus.Paid).reduce((sum, i) => sum + i.total, 0);
+    const totalClientes = mockClients.length;
+    const productosActivos = mockProducts.length;
+
+    const recentActivity = [
+        { color: 'green', text: "Nueva cotización #COT-00004 creada para 'Undermix'.", time: 'hace 2 días' },
+        { color: 'blue', text: "Factura #O-007 pagada por 'Undermix'.", time: 'hace 2 días' },
+        { color: 'purple', text: "Nuevo cliente 'Undermix' ha sido agregado.", time: 'hace 3 días' },
+    ];
+
     return (
         <div>
-            <h1 className="text-3xl font-bold mb-6 text-slate-800">Dashboard</h1>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <StatCard icon="fa-file-invoice-dollar" title="Total Cotizaciones" value="1,250" color="bg-blue-500" />
-                <StatCard icon="fa-dollar-sign" title="Total Facturado" value="$89,400" color="bg-green-500" />
-                <StatCard icon="fa-users" title="Total Clientes" value="320" color="bg-indigo-500" />
-                <StatCard icon="fa-box-open" title="Productos Activos" value="5,480" color="bg-yellow-500" />
+            <h1 className="text-3xl font-bold text-gray-800 mb-6">Dashboard</h1>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <StatCard icon="fa-file-alt" title="Total Cotizaciones" value={totalCotizaciones} color="blue" />
+                <StatCard icon="fa-dollar-sign" title="Total Facturado" value={`$${totalFacturado.toLocaleString()}`} color="green" />
+                <StatCard icon="fa-users" title="Total Clientes" value={totalClientes} color="purple" />
+                <StatCard icon="fa-box" title="Productos Activos" value={productosActivos} color="yellow" />
             </div>
-
-            <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-xl font-bold mb-4 text-slate-800">Actividad Reciente</h2>
-                <ul className="divide-y divide-slate-200">
-                    <li className="py-3 flex items-center">
-                        <i className="fas fa-plus-circle text-green-500 mr-4"></i>
-                        <div>
-                            <p className="font-semibold text-slate-700">Nueva cotización #C01250 creada para 'Tech Solutions Inc.'</p>
-                            <p className="text-sm text-slate-500">hace 2 minutos</p>
-                        </div>
-                    </li>
-                    <li className="py-3 flex items-center">
-                        <i className="fas fa-check-circle text-blue-500 mr-4"></i>
-                        <div>
-                            <p className="font-semibold text-slate-700">Factura #F0894 pagada por 'Global Web Services'.</p>
-                            <p className="text-sm text-slate-500">hace 1 hora</p>
-                        </div>
-                    </li>
-                     <li className="py-3 flex items-center">
-                        <i className="fas fa-user-plus text-indigo-500 mr-4"></i>
-                        <div>
-                            <p className="font-semibold text-slate-700">Nuevo cliente 'Innovate Corp' ha sido agregado.</p>
-                            <p className="text-sm text-slate-500">hace 3 horas</p>
-                        </div>
-                    </li>
-                </ul>
+            <div className="mt-8 bg-white rounded-lg shadow p-6">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">Actividad Reciente</h2>
+                <div className="space-y-4">
+                     {recentActivity.map((item, index) => <ActivityItem key={index} {...item} />)}
+                </div>
             </div>
         </div>
     );

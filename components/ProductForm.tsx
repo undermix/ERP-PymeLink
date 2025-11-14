@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Product, WarehouseStock } from '../types';
 import { mockWarehouses } from '../data/mockData';
@@ -63,8 +64,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCancel }) 
         onSave({ ...formData, id: product?.id || new Date().toISOString() });
     };
     
-    const inputClasses = "w-full pl-10 pr-4 py-3 bg-slate-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800";
-    const locationInputClasses = "w-full p-2 bg-white border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500";
+    const inputClasses = "w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800";
+    const locationInputClasses = "w-full p-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500";
 
     const availableWarehousesForNewLocation = mockWarehouses.filter(w => !formData.locations.some(l => l.warehouseId === w.id));
 
@@ -73,17 +74,17 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCancel }) 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Nombre Producto */}
                 <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-slate-600 mb-1">Nombre del Producto</label>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-600 mb-1">Nombre del Producto</label>
                     <div className="relative">
-                        <i className="fas fa-box absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <i className="fas fa-box absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                         <input id="name" type="text" name="name" value={formData.name} onChange={handleChange} required className={inputClasses}/>
                     </div>
                 </div>
                  {/* SKU */}
                 <div>
-                    <label htmlFor="sku" className="block text-sm font-medium text-slate-600 mb-1">SKU</label>
+                    <label htmlFor="sku" className="block text-sm font-medium text-gray-600 mb-1">SKU</label>
                     <div className="relative">
-                        <i className="fas fa-barcode absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <i className="fas fa-barcode absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                         <input id="sku" type="text" name="sku" value={formData.sku} onChange={handleChange} required className={inputClasses}/>
                     </div>
                 </div>
@@ -92,35 +93,35 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCancel }) 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Marca */}
                 <div>
-                    <label htmlFor="brand" className="block text-sm font-medium text-slate-600 mb-1">Marca</label>
+                    <label htmlFor="brand" className="block text-sm font-medium text-gray-600 mb-1">Marca</label>
                     <div className="relative">
-                        <i className="fas fa-tag absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <i className="fas fa-tag absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                         <input id="brand" type="text" name="brand" value={formData.brand} onChange={handleChange} required className={inputClasses}/>
                     </div>
                 </div>
                  {/* Modelo */}
                 <div>
-                    <label htmlFor="model" className="block text-sm font-medium text-slate-600 mb-1">Modelo</label>
+                    <label htmlFor="model" className="block text-sm font-medium text-gray-600 mb-1">Modelo</label>
                     <div className="relative">
-                        <i className="fas fa-cogs absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <i className="fas fa-cogs absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                         <input id="model" type="text" name="model" value={formData.model} onChange={handleChange} required className={inputClasses}/>
                     </div>
                 </div>
             </div>
 
             {/* Warehouse Locations */}
-            <div className="space-y-4 rounded-lg border border-slate-200 p-4">
-                <h3 className="font-semibold text-slate-700">Inventario por Bodega</h3>
+            <div className="space-y-4 rounded-lg border border-gray-200 p-4">
+                <h3 className="font-semibold text-gray-700">Inventario por Bodega</h3>
                 
                 {formData.locations.length > 0 && (
                     <div className="grid grid-cols-12 gap-x-3 px-2">
-                        <label className="col-span-4 text-xs font-medium text-slate-500">Bodega</label>
-                        <label className="col-span-3 text-xs font-medium text-slate-500">Precio</label>
-                        <label className="col-span-3 text-xs font-medium text-slate-500">Stock</label>
+                        <label className="col-span-4 text-xs font-medium text-gray-500">Bodega</label>
+                        <label className="col-span-3 text-xs font-medium text-gray-500">Precio</label>
+                        <label className="col-span-3 text-xs font-medium text-gray-500">Stock</label>
                     </div>
                 )}
 
-                {formData.locations.length === 0 && <p className="text-sm text-slate-500 text-center py-4">Agregue una ubicación para definir el precio y stock.</p>}
+                {formData.locations.length === 0 && <p className="text-sm text-gray-500 text-center py-4">Agregue una ubicación para definir el precio y stock.</p>}
                 
                 <div className="space-y-3">
                     {formData.locations.map((loc, index) => {
@@ -135,14 +136,14 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCancel }) 
                                     </select>
                                 </div>
                                 <div className="col-span-3 relative">
-                                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500 pointer-events-none">$</span>
+                                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 pointer-events-none">$</span>
                                     <input type="text" inputMode="numeric" placeholder="56.000" value={loc.price > 0 ? loc.price.toLocaleString('es-CL') : ''} onChange={(e) => handleLocationChange(index, 'price', e.target.value)} required className={`${locationInputClasses} pl-7`} aria-label="Precio" />
                                 </div>
                                 <div className="col-span-3">
                                     <input type="number" placeholder="5" value={loc.stock > 0 ? loc.stock : ''} onChange={(e) => handleLocationChange(index, 'stock', e.target.value)} min="0" required className={locationInputClasses} aria-label="Stock" />
                                 </div>
                                 <div className="col-span-2 text-right">
-                                     <button type="button" onClick={() => removeLocation(index)} className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-100" title="Eliminar ubicación">
+                                     <button type="button" onClick={() => removeLocation(index)} className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50" title="Eliminar ubicación">
                                         <i className="fas fa-trash-alt"></i>
                                     </button>
                                 </div>
@@ -150,23 +151,23 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSave, onCancel }) 
                         )
                     })}
                 </div>
-                 <button type="button" onClick={addLocation} disabled={availableWarehousesForNewLocation.length === 0} className="w-full mt-2 px-4 py-2 bg-indigo-100 text-indigo-700 font-semibold rounded-lg hover:bg-indigo-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                 <button type="button" onClick={addLocation} disabled={availableWarehousesForNewLocation.length === 0} className="w-full mt-2 px-4 py-2 bg-blue-50 text-blue-700 font-semibold rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm">
                     <i className="fas fa-plus mr-2"></i>Agregar Ubicación
                 </button>
             </div>
             
             {/* Description */}
             <div>
-                <label htmlFor="description" className="block text-sm font-medium text-slate-600 mb-1">Descripción</label>
+                <label htmlFor="description" className="block text-sm font-medium text-gray-600 mb-1">Descripción</label>
                  <div className="relative">
-                    <i className="fas fa-align-left absolute left-3 top-4 text-slate-400"></i>
-                    <textarea id="description" name="description" value={formData.description} onChange={handleChange} rows={3} className={inputClasses + ' pt-3'}></textarea>
+                    <i className="fas fa-align-left absolute left-3 top-3.5 text-gray-400"></i>
+                    <textarea id="description" name="description" value={formData.description} onChange={handleChange} rows={3} className={inputClasses + ' pt-2'}></textarea>
                 </div>
             </div>
             {/* Buttons */}
             <div className="flex justify-end space-x-4 pt-4">
-                <button type="button" onClick={onCancel} className="px-6 py-2 bg-slate-100 text-slate-700 font-semibold rounded-lg hover:bg-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-400">Cancelar</button>
-                <button type="submit" className="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Guardar</button>
+                 <button type="button" onClick={onCancel} className="px-6 py-2 bg-white text-gray-700 font-medium text-sm rounded-md border border-gray-300 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400">Cancelar</button>
+                <button type="submit" className="px-6 py-2 bg-blue-600 text-white font-medium text-sm rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Guardar</button>
             </div>
         </form>
     );

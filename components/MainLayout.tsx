@@ -1,11 +1,13 @@
-
 import React, { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../App';
+import { useCompany } from '../App';
 
 const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isInventoryOpen, setIsInventoryOpen] = useState(true);
   const auth = useAuth();
+  const { companyInfo } = useCompany();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -13,73 +15,101 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     navigate('/login');
   };
 
-  const navItems = [
-    { to: "/dashboard", icon: "fa-tachometer-alt", label: "Dashboard" },
-    { to: "/clients", icon: "fa-users", label: "Clientes" },
-    { to: "/products", icon: "fa-box-open", label: "Productos" },
-    { to: "/warehouses", icon: "fa-warehouse", label: "Bodegas" },
-    { to: "/invoices", icon: "fa-file-invoice", label: "Ordenes" },
-    { to: "/profile", icon: "fa-user-cog", label: "Perfil y Usuarios" },
-  ];
-
-  const NavItem: React.FC<{ to: string, icon: string, label: string }> = ({ to, icon, label }) => (
+  const NavItem: React.FC<{ to: string, icon: string, label: string, isSubItem?: boolean }> = ({ to, icon, label, isSubItem = false }) => (
     <NavLink
       to={to}
+      end
       className={({ isActive }) => 
-        `flex items-center px-4 py-3 rounded-lg transition-colors duration-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900 ${isActive ? 'bg-indigo-50 text-indigo-600 font-semibold' : ''}`
+        `flex items-center px-4 py-2.5 rounded-lg transition-colors duration-200 text-sm font-medium ${isSubItem ? 'pl-8' : ''} ${
+          isActive 
+            ? 'bg-gray-100 text-blue-600' 
+            : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+        }`
       }
       onClick={() => setSidebarOpen(false)}
     >
-      {/* FIX: Use NavLink's children render prop to access `isActive` for styling child elements. */}
-      {({ isActive }) => (
-        <>
-          <i className={`fas ${icon} w-6 text-center text-lg ${isActive ? 'text-indigo-600' : 'text-slate-400'}`}></i>
-          <span className="ml-4">{label}</span>
-        </>
-      )}
+      <i className={`fas ${icon} w-6 text-center text-base`}></i>
+      <span className="ml-2 whitespace-nowrap">{label}</span>
     </NavLink>
   );
 
   return (
-    <div className="flex h-screen bg-slate-50 text-slate-800">
+    <div className="flex h-screen bg-slate-50 text-gray-800 font-sans">
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-30 w-64 bg-white transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:relative md:translate-x-0 border-r border-slate-200`}>
-        <div className="flex items-center justify-center h-20 border-b border-slate-200">
-          <i className="fas fa-cubes text-3xl text-indigo-500"></i>
-          <h1 className="text-2xl font-bold ml-3 text-slate-800">ERP System</h1>
+      <aside className={`fixed inset-y-0 left-0 z-30 w-64 bg-white transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:relative md:translate-x-0 border-r border-gray-200 flex flex-col`}>
+        <div className="flex items-center h-16 px-6 border-b border-gray-200 flex-shrink-0">
+            {companyInfo.logoUrl ? (
+              <img src={companyInfo.logoUrl} alt="Company Logo" className="w-10 h-10 rounded-lg object-cover" />
+            ) : (
+              <i className="fab fa-google text-3xl text-blue-500"></i>
+            )}
+            <div className="ml-3">
+                <h1 className="text-lg font-bold text-gray-800">{companyInfo.name}</h1>
+                <p className="text-xs text-gray-500">ERP para Pymes</p>
+            </div>
         </div>
-        <nav className="p-4 space-y-2">
-          {navItems.map(item => <NavItem key={item.to} {...item} />)}
+        
+        <nav className="flex-grow p-4 space-y-2 overflow-y-auto">
+          <div>
+            <h2 className="px-4 py-2 text-sm font-bold text-gray-400 uppercase tracking-wider">Menú Principal</h2>
+            <NavItem to="/dashboard" icon="fa-th-large" label="Dashboard" />
+            <NavItem to="/clients" icon="fa-users" label="Clientes" />
+          </div>
+
+           <div>
+            <h2 className="px-4 py-2 text-sm font-bold text-gray-400 uppercase tracking-wider">Ventas</h2>
+             <NavItem to="/quotes" icon="fa-file-invoice" label="Cotizaciones" />
+             <NavItem to="/invoices" icon="fa-file-invoice-dollar" label="Órdenes" />
+             <NavItem to="/pos-history" icon="fa-history" label="Venta POS" />
+          </div>
+          
+          <div>
+            <h2 className="px-4 py-2 text-sm font-bold text-gray-400 uppercase tracking-wider">Logística</h2>
+            <button 
+              onClick={() => setIsInventoryOpen(!isInventoryOpen)}
+              className="flex items-center w-full px-4 py-2.5 rounded-lg transition-colors duration-200 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+            >
+              <i className="fas fa-truck w-6 text-center text-base"></i>
+              <span className="ml-2 whitespace-nowrap">Gestión de Inventario</span>
+              <i className={`fas fa-chevron-up ml-auto transition-transform duration-200 ${isInventoryOpen ? '' : 'rotate-180'}`}></i>
+            </button>
+            {isInventoryOpen && (
+              <div className="mt-1 space-y-1">
+                <NavItem to="/warehouses" icon="fa-warehouse" label="Bodegas" isSubItem />
+                <NavItem to="/stock-movements" icon="fa-history" label="Movimientos de Stock" isSubItem />
+                <NavItem to="/products" icon="fa-box-open" label="Productos" isSubItem />
+                <NavItem to="/price-lists" icon="fa-dollar-sign" label="Listas de Precios" isSubItem />
+              </div>
+            )}
+          </div>
         </nav>
-        <div className="absolute bottom-0 w-full p-4 border-t border-slate-200">
-          <button onClick={handleLogout} className="flex items-center w-full px-4 py-3 text-slate-600 hover:bg-slate-100 hover:text-slate-900 rounded-lg transition-colors duration-200">
-            <i className="fas fa-sign-out-alt w-6 text-center text-slate-400"></i>
-            <span className="ml-4 font-medium">Cerrar Sesión</span>
-          </button>
+        
+        <div className="p-4 border-t border-gray-200 flex-shrink-0">
+            <NavItem to="/settings" icon="fa-cog" label="Configuración" />
+            <button onClick={handleLogout} className="flex items-center w-full px-4 py-2.5 mt-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-lg transition-colors duration-200 text-sm font-medium">
+                <i className="fas fa-sign-out-alt w-6 text-center"></i>
+                <span className="ml-2 whitespace-nowrap">Cerrar Sesión</span>
+            </button>
         </div>
       </aside>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-200">
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-slate-500 focus:outline-none md:hidden">
+        <header className="flex items-center justify-between h-16 px-6 bg-white border-b border-gray-200">
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-gray-500 focus:outline-none md:hidden">
             <i className="fas fa-bars text-2xl"></i>
           </button>
+           <div className="flex-1"></div>
           <div className="flex items-center">
-             <div className="relative">
-                <input type="text" placeholder="Buscar..." className="w-full sm:w-64 pl-4 pr-10 py-2 rounded-full bg-slate-100 border-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                <i className="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-             </div>
-          </div>
-          <div className="flex items-center">
-            <i className="fas fa-bell text-xl text-slate-500 hover:text-indigo-500 cursor-pointer"></i>
-            <div className="ml-6 flex items-center">
-                <img src="https://picsum.photos/40/40" alt="User" className="w-10 h-10 rounded-full" />
-                <div className="ml-3 hidden sm:block">
-                    <p className="font-semibold text-sm text-slate-700">Admin</p>
-                    <p className="text-xs text-slate-500">administrator</p>
-                </div>
+            <Link to="/pos" className="text-xl text-gray-500 hover:text-blue-500 cursor-pointer" title="Punto de Venta (POS)">
+              <i className="fas fa-cash-register"></i>
+            </Link>
+            <i className="fas fa-bell text-xl text-gray-500 hover:text-blue-500 cursor-pointer ml-6"></i>
+             <div className="ml-6 flex items-center">
+                <Link to="/profile" className="flex items-center focus:outline-none">
+                    <img src="https://picsum.photos/40/40" alt="User" className="w-10 h-10 rounded-full" />
+                </Link>
             </div>
           </div>
         </header>
